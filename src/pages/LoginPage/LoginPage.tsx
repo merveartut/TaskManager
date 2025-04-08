@@ -31,6 +31,7 @@ export const LoginPage: React.FC = () => {
 
       // Save the token
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.userId);
       navigate("/projects");
     } catch (error: any) {
       console.error("Login failed", error);

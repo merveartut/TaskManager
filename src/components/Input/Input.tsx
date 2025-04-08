@@ -6,6 +6,8 @@ interface InputProps {
   type: string;
   name: string;
   value: string;
+  variant?: "filled" | "outlined" | "standard";
+  customClass?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -14,14 +16,18 @@ export const Input: React.FC<InputProps> = ({
   type,
   name,
   value,
+  customClass,
+  variant = "outlined",
   onChange,
 }) => {
   return (
-    <div className="mb-10">
+    <div>
       <TextField
         id="outlined-basic"
         label={label}
-        variant="outlined"
+        type={type}
+        variant={variant}
+        className={customClass}
         value={value}
         name={name}
         onChange={onChange}

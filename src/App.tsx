@@ -10,6 +10,8 @@ import {
 import { Projects } from "./pages/DashboardPage/Projects";
 import { Navbar } from "./components/Navbar/Navbar";
 import { FileText, Folder, Home, List, User } from "lucide-react";
+import { ProjectDetailPage } from "./pages/ProjectDetailPage/ProjectDetailPage";
+import { TaskDetailPage } from "./pages/TaskDetailPage/TaskDetailPage";
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function AppContent() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
+          <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
           <Route path="*" element={<Navigate to="/login" />} />{" "}
           {/* Redirect unknown routes to login */}
         </Routes>

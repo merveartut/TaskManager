@@ -139,16 +139,14 @@ export const Projects: React.FC = () => {
         {projects.map((project: any) => (
           <div
             key={project.id}
-            className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="bg-white flex flex-col p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => navigate(`/projectDetail/${project.id}`)}
           >
             <h2 className="text-xl font-semibold">{project.title}</h2>
             <p className="text-gray-600 mt-4">Status: {project.status}</p>
             <p className="text-gray-600 mt-4">
               Department: {project.departmentName}
             </p>
-            <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-              View Details
-            </button>
           </div>
         ))}
       </div>
