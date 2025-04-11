@@ -2,14 +2,16 @@ import { FileUpload } from "primereact/fileupload";
 import React from "react";
 
 interface FileProps {
-  taskId: any;
-  userId: any;
+  taskId?: any;
+  userId?: any;
+  label?: string;
   onUploadComplete?: () => void;
 }
 
 export const FileUploader: React.FC<FileProps> = ({
   taskId,
   userId,
+  label = "Upload",
   onUploadComplete,
 }) => {
   const handleUpload = async (event: any) => {
@@ -41,14 +43,12 @@ export const FileUploader: React.FC<FileProps> = ({
     }
   };
   return (
-    <div className="card">
-      <FileUpload
-        name="file"
-        customUpload
-        uploadHandler={handleUpload}
-        auto
-        chooseLabel="Upload File"
-      />
-    </div>
+    <FileUpload
+      name="file"
+      customUpload
+      uploadHandler={handleUpload}
+      auto
+      chooseLabel={label}
+    />
   );
 };

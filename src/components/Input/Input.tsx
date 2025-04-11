@@ -31,7 +31,13 @@ export const Input: React.FC<InputProps> = ({
         value={value}
         name={name}
         onChange={onChange}
-        style={{ width: "300px" }}
+        sx={{
+          width: "300px",
+          "& .MuiInputBase-root": {
+            backgroundColor: "white",
+          },
+        }}
+        style={{ width: "300px", backgroundColor: "white" }}
       />
     </div>
   );

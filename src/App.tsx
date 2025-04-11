@@ -9,9 +9,10 @@ import {
 } from "react-router-dom";
 import { Projects } from "./pages/DashboardPage/Projects";
 import { Navbar } from "./components/Navbar/Navbar";
-import { FileText, Folder, Home, List, User } from "lucide-react";
+import { FileText, Folder, Home, List, Settings, User } from "lucide-react";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage/ProjectDetailPage";
 import { TaskDetailPage } from "./pages/TaskDetailPage/TaskDetailPage";
+import { SettingsPage } from "./pages/SettingsPage/SettingsPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function AppContent() {
     { name: "Tasks", path: "/tasks", icon: <List size={20} /> },
     { name: "Reports", path: "/reports", icon: <FileText size={20} /> },
     { name: "Profile", path: "/profile", icon: <User size={20} /> },
+    { name: "Admin Settings", path: "/settings", icon: <Settings size={20} /> },
   ];
 
   return (
@@ -42,6 +44,7 @@ function AppContent() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
           <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/login" />} />{" "}
           {/* Redirect unknown routes to login */}
         </Routes>

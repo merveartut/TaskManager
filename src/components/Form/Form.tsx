@@ -7,20 +7,28 @@ interface Field {
   label: string;
   type: string;
   isSingleSelect?: boolean;
+  defaultValue?: string;
+  displayLabel?: boolean;
   options?: { value: string; label: string }[];
 }
 
 interface FormProps {
   fields: Field[];
   onSubmit: (formData: Record<string, string | string[]>) => void;
+  initialValues?: Record<string, any>;
 }
 
-export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
+export const Form: React.FC<FormProps> = ({
+  fields,
+  onSubmit,
+  initialValues = {},
+}) => {
   const [formData, setFormData] = useState<Record<string, any>>(
     Object.fromEntries(
       fields.map((field) => [
         field.name,
-        field.type === "picker" ? (field.isSingleSelect ? null : []) : "",
+        initialValues[field.name] ??
+          (field.type === "picker" ? (field.isSingleSelect ? null : []) : ""),
       ])
     )
   );
@@ -30,6 +38,8 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
   };
 
   const handleSelectChange = (name: string, selectedValues: any[] | any) => {
+    console.log("selecteeeed", selectedValues);
+
     setFormData({
       ...formData,
       [name]: selectedValues,
@@ -49,14 +59,14 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
             label={field.label}
             options={field.options}
             customClass="mb-6"
+            displayLabel={field.displayLabel || false}
             isSingleSelect={field.isSingleSelect || false}
-            selectedValues={formData[field.name]}
+            selectedValues={field.defaultValue || formData[field.name]}
             onChange={(selected) => handleSelectChange(field.name, selected)}
           />
         ) : (
-          <div className="mb-10">
+          <div className="mb-10" key={index}>
             <Input
-              key={index}
               label={field.label}
               type={field.type}
               name={field.name}
@@ -68,7 +78,7 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
       )}
       <button
         type="submit"
-        className="mt-4 bg-blue-200 text-white py-2 px-4 rounded"
+        className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
       >
         Submit
       </button>

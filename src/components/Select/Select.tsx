@@ -84,7 +84,7 @@ export const Select: React.FC<SelectProps> = ({
 
       {/* Input Field (Searchable) */}
       <div
-        className={`border border-gray-300 rounded-md shadow-sm p-2 flex flex-wrap gap-2 items-center justify-between cursor-pointer h-[55px]`}
+        className={`border border-gray-300 rounded-md shadow-sm p-2 flex flex-wrap flex-row items-center justify-between cursor-pointer h-[55px]`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex flex-wrap gap-2 items-center">
@@ -92,6 +92,7 @@ export const Select: React.FC<SelectProps> = ({
             isSingleSelect ? (
               <span>{selectedValues.name || selectedValues}</span>
             ) : (
+              selectedValues.length &&
               selectedValues.map((value, index) => (
                 <span
                   key={index}
@@ -112,7 +113,7 @@ export const Select: React.FC<SelectProps> = ({
               ))
             )
           ) : (
-            <span className="text-gray-400">Select {label} ...</span>
+            <span className="text-gray-400">{label}</span>
           )}
         </div>
         <ChevronDown

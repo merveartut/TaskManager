@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
+import { projectStatusColors } from "../../constants/uiColors";
 
 interface Project {
   id: string;
@@ -139,14 +140,20 @@ export const Projects: React.FC = () => {
         {projects.map((project: any) => (
           <div
             key={project.id}
-            className="bg-white flex flex-col p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="bg-white flex flex-col items-center p-4 gap-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => navigate(`/projectDetail/${project.id}`)}
           >
             <h2 className="text-xl font-semibold">{project.title}</h2>
-            <p className="text-gray-600 mt-4">Status: {project.status}</p>
-            <p className="text-gray-600 mt-4">
+            <p className="text-gray-600">
               Department: {project.departmentName}
             </p>
+            <div
+              className={`font-roboto font-bold p-2 w-fit rounded-md ${
+                projectStatusColors[project?.status] || ""
+              }`}
+            >
+              {project && project.status}
+            </div>
           </div>
         ))}
       </div>
@@ -155,7 +162,7 @@ export const Projects: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Create New Project"
+        title="CREATE NEW PROJECT"
       >
         <Form fields={modalFields} onSubmit={handleCreateProject} />
       </Modal>
