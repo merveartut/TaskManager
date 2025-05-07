@@ -8,6 +8,8 @@ interface SelectProps {
   selectedValues: any[] | any;
   customClass?: string;
   displayLabel?: boolean;
+  displayClearButtonForSingleSelect?: boolean;
+  clearSelected?: () => void;
   onChange: (selected: string[] | string) => void;
 }
 
@@ -18,6 +20,8 @@ export const Select: React.FC<SelectProps> = ({
   displayLabel = false,
   isSingleSelect = false,
   selectedValues,
+  displayClearButtonForSingleSelect = false,
+  clearSelected,
   onChange,
 }) => {
   const [search, setSearch] = useState("");
@@ -46,6 +50,13 @@ export const Select: React.FC<SelectProps> = ({
           ? selectedValues !== option
           : !selectedValues.includes(option))
       );
+    } else if (option.title) {
+      return (
+        option?.title?.toLowerCase().includes(search.toLowerCase()) &&
+        (isSingleSelect
+          ? selectedValues !== option
+          : !selectedValues.includes(option))
+      );
     } else {
       return (
         option.toLowerCase().includes(search.toLocaleLowerCase()) &&
@@ -62,17 +73,22 @@ export const Select: React.FC<SelectProps> = ({
     } else {
       if (isSingleSelect) {
         onChange(value);
+        setIsOpen(false);
       } else {
         onChange([...selectedValues, value]);
       }
     }
-    setIsOpen(false);
   };
 
   const removeSelected = (e: any, value: any) => {
-    console.log("kfjgnhdfjkgjdfbj", e);
     e.preventDefault();
     onChange(selectedValues.filter((v) => v !== value));
+  };
+  const getOptionLabel = (opt: any) => {
+    if (typeof opt === "string") return opt;
+    if (opt.name) return opt.name;
+    if (opt.title) return opt.title;
+    return JSON.stringify(opt);
   };
   return (
     <div className={`relative ${customClass}`} ref={dropdownRef}>
@@ -87,35 +103,46 @@ export const Select: React.FC<SelectProps> = ({
         className={`border border-gray-300 rounded-md shadow-sm p-2 flex flex-wrap flex-row items-center justify-between cursor-pointer h-[55px]`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex flex-wrap gap-2 items-center">
-          {selectedValues ? (
-            isSingleSelect ? (
-              <span>{selectedValues.name || selectedValues}</span>
-            ) : (
-              selectedValues.length &&
-              selectedValues.map((value, index) => (
+        <div className="flex flex-wrap gap-2 items-center overflow-y-auto max-h-[100px]">
+          {isSingleSelect ? (
+            <div>
+              {" "}
+              {selectedValues ? (
+                <span>{getOptionLabel(selectedValues)}</span>
+              ) : (
+                <span className="text-gray-400">{label}</span>
+              )}
+              {displayClearButtonForSingleSelect && (
                 <span
-                  key={index}
-                  onClick={(e) => removeSelected(e, value)}
                   className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm"
+                  onClick={clearSelected}
                 >
-                  {typeof value === "string"
-                    ? value
-                    : options.find(
-                        (opt) =>
-                          (typeof opt === "object" &&
-                            opt?.name === value?.name) ||
-                          opt === value
-                      )?.name ||
-                      (typeof value === "object" ? value?.name : value)}{" "}
                   ✖
                 </span>
-              ))
-            )
+              )}
+            </div>
+          ) : selectedValues?.length ? (
+            <>
+              {selectedValues.slice(0, 3).map((value: any, index: number) => (
+                <span
+                  key={index}
+                  className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm"
+                  onClick={(e) => removeSelected(e, value)}
+                >
+                  {getOptionLabel(value)} ✖
+                </span>
+              ))}
+              {selectedValues.length > 3 && (
+                <span className="text-sm text-gray-500 ml-1">
+                  +{selectedValues.length - 3} more
+                </span>
+              )}
+            </>
           ) : (
             <span className="text-gray-400">{label}</span>
           )}
         </div>
+
         <ChevronDown
           className={`ml-auto text-gray-500 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -140,7 +167,7 @@ export const Select: React.FC<SelectProps> = ({
                 onClick={() => handleSelect(option)}
                 className={`p-2 cursor-pointer hover:bg-blue-100 flex items-start pl-4 `}
               >
-                {option.name || option}
+                {getOptionLabel(option)}
               </div>
             ))
           ) : (

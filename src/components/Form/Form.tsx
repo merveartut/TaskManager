@@ -9,6 +9,7 @@ interface Field {
   isSingleSelect?: boolean;
   defaultValue?: string;
   displayLabel?: boolean;
+  visible?: boolean;
   options?: { value: string; label: string }[];
 }
 
@@ -38,8 +39,6 @@ export const Form: React.FC<FormProps> = ({
   };
 
   const handleSelectChange = (name: string, selectedValues: any[] | any) => {
-    console.log("selecteeeed", selectedValues);
-
     setFormData({
       ...formData,
       [name]: selectedValues,
@@ -52,29 +51,31 @@ export const Form: React.FC<FormProps> = ({
   };
   return (
     <form onSubmit={handleSubmit} className="p-4 border rounded-md">
-      {fields.map((field, index) =>
-        field.type === "picker" && field.options ? (
-          <Select
-            key={index}
-            label={field.label}
-            options={field.options}
-            customClass="mb-6"
-            displayLabel={field.displayLabel || false}
-            isSingleSelect={field.isSingleSelect || false}
-            selectedValues={field.defaultValue || formData[field.name]}
-            onChange={(selected) => handleSelectChange(field.name, selected)}
-          />
-        ) : (
-          <div className="mb-10" key={index}>
-            <Input
+      {fields.map(
+        (field, index) =>
+          field.visible &&
+          (field.type === "picker" && field.options ? (
+            <Select
+              key={index}
               label={field.label}
-              type={field.type}
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
+              options={field.options}
+              customClass="mb-6"
+              displayLabel={field.displayLabel || false}
+              isSingleSelect={field.isSingleSelect || false}
+              selectedValues={field.defaultValue || formData[field.name]}
+              onChange={(selected) => handleSelectChange(field.name, selected)}
             />
-          </div>
-        )
+          ) : (
+            <div className="mb-10" key={index}>
+              <Input
+                label={field.label}
+                type={field.type}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+              />
+            </div>
+          ))
       )}
       <button
         type="submit"

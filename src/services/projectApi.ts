@@ -33,7 +33,7 @@ export const fetchUsers = async (navigate: any) => {
 };
 
 export const fetchTasksByProjectId = async (id: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/tasks/project/${id}`, {
+  const response = await fetch(`${API_BASE}/tasks/v1/project/${id}`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return [];
@@ -51,6 +51,8 @@ export const getTaskById = async (id: string, navigate: any) => {
 }
 
 export const createTask = async (data: any, navigate: any) => {
+  console.log("jdhjdfg", data);
+  
   const response = await fetch(`${API_BASE}/tasks/v1`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -90,9 +92,7 @@ export const fetchComments = async (id: string, navigate: any) => {
   return response.json();
 }
 
-export const updateTask = async (data: any, navigate: any) => {
-  console.log("neeee dataa", data);
-  
+export const updateTask = async (data: any, navigate: any) => {  
   const response = await fetch(`${API_BASE}/tasks/v1/update`, {
     method: "PUT",
     headers: getAuthHeaders(),
@@ -133,3 +133,186 @@ export const updateProject = async (data:any, navigate:any) => {
   if (!response.ok) throw new Error("Failed to update project");
   return response.json();
 }
+
+export const updateTaskState = async(data: { id: string; state: string; reason?: string }, navigate: any) => {
+  const { id, state, reason } = data;
+  const queryParams = new URLSearchParams();
+  queryParams.append("id", id);
+  queryParams.append("state", state);
+  if (reason) queryParams.append("reason", reason);
+  const response = await fetch(
+    `${API_BASE}/tasks/v1/set-state?${queryParams.toString()}`,
+    {
+      method: "PUT",
+      headers: getAuthHeaders()
+    }
+  );
+  if (handleAuthRedirect(response, navigate)) return null;
+  if (!response.ok) throw new Error("Failed to update task state");
+  return response.json();
+}
+
+export const createTodo = async(data: any, navigate:any) => {
+  const response = await fetch(`${API_BASE}/todos/v1`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  })
+  if (handleAuthRedirect(response, navigate)) return null;
+  if (!response.ok) throw new Error("Failed to create todo");
+  return response.json();
+}
+
+export const fetchTodos = async (taskId: string, navigate: any) => {
+  const response = await fetch(`${API_BASE}/todos/v1?taskId=${taskId}`, {
+    headers: getAuthHeaders(),
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch todos");
+  return response.json();
+}
+
+export const updateTodoState = async(id: string, state: boolean, navigate:any) => {
+  const response = await fetch(`${API_BASE}/todos/v1/update-state?id=${id}&state=${state}`, {
+    method: "PUT",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to update todo state");
+  return response.json();
+}
+
+export const fetchTasks = async(navigate:any) => {
+  const response = await fetch(`${API_BASE}/tasks/v1`, {
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch tasks");
+  return response.json();
+}
+
+export const deleteProject = async(id: string, navigate:any) => {
+  const response = await fetch(`${API_BASE}/projects/v1?id=${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to delete project");
+}
+
+export const deleteTask = async(id: string, navigate:any) => {
+  const response = await fetch(`${API_BASE}/tasks/v1?id=${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to delete task");
+}
+
+export const getUserById = async(id: string, navigate:any) => {
+  const response = await fetch(`${API_BASE}/users/v1/${id}`, {
+    method:"GET",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to get user");
+
+  return response.json()
+}
+
+export const fetchTasksByUserId = async (id: string, navigate: any) => {
+  const response = await fetch(`${API_BASE}/tasks/v1/user/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch tasks");
+  return response.json();
+};
+
+export const fetchProjects = async(navigate:any) => {
+  const response = await fetch(`${API_BASE}/projects/v1`, {
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch projects");
+  return response.json();
+}
+
+export const fetchProjectsByManager = async(userId:string, navigate: any) => {
+  const response = await fetch(`${API_BASE}/projects/v1/by-manager?userId=${userId}`, {
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch projects");
+  return response.json();
+}
+
+export const deleteUser = async(userId: string, navigate: any) => {
+  const response = await fetch(`${API_BASE}/users/v1?id=${userId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to delete user");
+}
+
+export const updateUserEmail = async(id: string, email: string, navigate:any) => {
+  const response = await fetch(`${API_BASE}/users/v1/update-email?id=${id}&email=${email}`, {
+    method: "PUT",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to update user email");
+  return response.json();
+}
+
+export const updateUserName = async(id: string, name: string, navigate:any) => {
+  const response = await fetch(`${API_BASE}/users/v1/update-name?id=${id}&name=${name}`, {
+    method: "PUT",
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to update user name");
+  return response.json();
+}
+
+export const fetchProjectsByTeamMember = async(userId:string, navigate: any) => {
+  const response = await fetch(`${API_BASE}/projects/v1/by-team-member?userId=${userId}`, {
+    headers: getAuthHeaders()
+  })
+  if (handleAuthRedirect(response, navigate)) return [];
+  if (!response.ok) throw new Error("Failed to fetch projects");
+  return response.json();
+}
+
+export const changePassword = async (data: any, navigate: any) => {
+  const token = localStorage.getItem("token");
+  console.log("Sending Authorization Header:", `Bearer ${token}`);
+
+  const response = await fetch(`http://localhost:8080/auth/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      oldPassword: data.oldPassword,
+      newPassword: data.newPassword,
+    }),
+  });
+
+  const text = await response.text();
+  let result;
+
+  try {
+    result = JSON.parse(text);
+  } catch (err) {
+    result = { message: text };
+  }
+
+  if (!response.ok) {
+    throw new Error(result.message || "Change password failed");
+  }
+
+  return result;
+};

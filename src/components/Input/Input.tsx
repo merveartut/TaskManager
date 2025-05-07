@@ -1,5 +1,6 @@
-import { TextField } from "@mui/material";
-import React from "react";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { Eye, EyeOff } from "lucide-react";
+import React, { useState } from "react";
 
 interface InputProps {
   label: string;
@@ -20,12 +21,16 @@ export const Input: React.FC<InputProps> = ({
   variant = "outlined",
   onChange,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordType = type === "password";
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
   return (
     <div>
       <TextField
         id="outlined-basic"
         label={label}
-        type={type}
+        type={isPasswordType && !showPassword ? "password" : "text"}
         variant={variant}
         className={customClass}
         value={value}
@@ -38,6 +43,15 @@ export const Input: React.FC<InputProps> = ({
           },
         }}
         style={{ width: "300px", backgroundColor: "white" }}
+        InputProps={{
+          endAdornment: isPasswordType && (
+            <InputAdornment position="end">
+              <IconButton onClick={handleClickShowPassword} edge="end">
+                {showPassword ? <Eye /> : <EyeOff />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
     </div>
   );

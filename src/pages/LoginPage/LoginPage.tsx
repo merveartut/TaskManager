@@ -4,8 +4,8 @@ import image from "../../assets/task_image.jpg";
 import { useNavigate } from "react-router-dom";
 
 const loginFields = [
-  { name: "username", label: "Username", type: "username" },
-  { name: "password", label: "Password", type: "password" },
+  { name: "username", label: "Username", type: "username", visible: true },
+  { name: "password", label: "Password", type: "password", visible: true },
 ];
 
 export const LoginPage: React.FC = () => {
@@ -32,6 +32,8 @@ export const LoginPage: React.FC = () => {
       // Save the token
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userRole", data.role);
+      localStorage.setItem("userName", formData.username);
       navigate("/projects");
     } catch (error: any) {
       console.error("Login failed", error);

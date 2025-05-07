@@ -13,6 +13,10 @@ import { FileText, Folder, Home, List, Settings, User } from "lucide-react";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage/ProjectDetailPage";
 import { TaskDetailPage } from "./pages/TaskDetailPage/TaskDetailPage";
 import { SettingsPage } from "./pages/SettingsPage/SettingsPage";
+import { Tasks } from "./pages/DashboardPage/Tasks";
+import { Toaster } from "react-hot-toast";
+import Avatar from "@mui/material/Avatar";
+import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
 
 function App() {
   return (
@@ -25,26 +29,58 @@ function App() {
 function AppContent() {
   const location = useLocation();
   const hideNavbarRoutes = ["/login"];
+
+  const userName = localStorage.getItem("userName");
+  const userId = localStorage.getItem("userId");
+  const currentUserRole = localStorage.getItem("userRole");
+
   const menuItems = [
-    { name: "Projects", path: "/projects", icon: <Folder size={20} /> },
-    { name: "Tasks", path: "/tasks", icon: <List size={20} /> },
-    { name: "Reports", path: "/reports", icon: <FileText size={20} /> },
-    { name: "Profile", path: "/profile", icon: <User size={20} /> },
-    { name: "Admin Settings", path: "/settings", icon: <Settings size={20} /> },
+    {
+      name: "Projects",
+      path: "/projects",
+      icon: <Folder size={20} />,
+      display: true,
+    },
+    { name: "Tasks", path: "/tasks", icon: <List size={20} />, display: true },
+    {
+      name: "User Settings",
+      path: "/settings",
+      icon: <Settings size={20} />,
+      display: currentUserRole === "ADMIN",
+    },
   ];
+
+  const userInfo = {
+    path: `/profile/${userId}`,
+    userName: userName,
+    userId: userId,
+    name: "Profile",
+  };
 
   return (
     <div className="flex h-screen">
       {!hideNavbarRoutes.includes(location.pathname) && (
-        <Navbar items={menuItems} />
+        <Navbar items={menuItems} userInfo={userInfo} />
       )}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            width: "400px",
+            height: "80px",
+          },
+        }}
+      />
       <div className="flex-1 overflow-auto">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
           <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="*" element={<Navigate to="/login" />} />{" "}
           {/* Redirect unknown routes to login */}
         </Routes>

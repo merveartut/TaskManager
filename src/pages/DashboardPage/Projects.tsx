@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
 import { projectStatusColors } from "../../constants/uiColors";
+import { Input } from "../../components/Input/Input";
+import { Select } from "../../components/Select/Select";
 
 interface Project {
   id: string;
@@ -18,16 +20,34 @@ export const Projects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchByTitle, setSearchByTitle] = useState("");
+  const [selectedProjectStatus, setSelectedProjectStatus] =
+    useState<string>("");
+  const currentUserRole = localStorage.getItem("userRole");
   const navigate = useNavigate();
 
   const modalFields = [
-    { name: "title", label: "Title", type: "text" },
-    { name: "description", label: "Description", type: "text" },
-    { name: "departmentName", label: "Department Name", type: "text" },
+    { name: "title", label: "Title", type: "text", visible: true },
+    { name: "description", label: "Description", type: "text", visible: true },
+    {
+      name: "departmentName",
+      label: "Department Name",
+      type: "text",
+      visible: true,
+    },
+    {
+      name: "projectManager",
+      label: "Project Manager",
+      type: "picker",
+      visible: true,
+      isSingleSelect: true,
+      options: users.filter((user) => user.role === "PROJECT_MANAGER"),
+    },
     {
       name: "teamMembers",
       label: "Team Members",
       type: "picker",
+      visible: true,
       options: users,
     }, // Pass users as options
   ];
@@ -87,6 +107,7 @@ export const Projects: React.FC = () => {
         }
 
         const data = await response.json();
+
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -122,22 +143,52 @@ export const Projects: React.FC = () => {
     }
   };
 
+  const filteredProjects = projects.filter((project) => {
+    return (
+      project.title.toLowerCase().includes(searchByTitle.toLowerCase()) &&
+      project.status &&
+      (project.status.toString().includes(selectedProjectStatus) ||
+        selectedProjectStatus === "ALL")
+    );
+  });
   return (
     <div className="w-full h-full flex  flex-col">
-      <div className="flex justify-start p-8">
-        <h1 className="text-2xl font-bold mb-4">Projects</h1>
+      <div className="flex flex-row justify-between items-center p-8">
+        <h1 className="text-[24px] font-bold px-8 font-roboto">Projects</h1>
+        <div className="flex flex-row gap-4">
+          <Input
+            label="Search by title"
+            type="text"
+            name="title"
+            variant="outlined"
+            customClass="bg-white rounded-md"
+            value={searchByTitle}
+            onChange={(e) => setSearchByTitle(e.target.value)}
+          ></Input>
+          <Select
+            options={["ALL", "IN_PROGRESS", "CANCELLED", "COMPLETED"]}
+            selectedValues={selectedProjectStatus}
+            displayLabel={false}
+            onChange={(selected) => setSelectedProjectStatus(selected)}
+            isSingleSelect={true}
+            customClass="bg-white rounded-md w-[200px]"
+            label="Filter By State"
+          ></Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        <div
-          onClick={() => setIsModalOpen(true)}
-          className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-        >
-          <h2 className="text-xl font-semibold mb-6">Create new Project</h2>
-          <CirclePlus size={36} />
-        </div>
+        {currentUserRole === "ADMIN" && (
+          <div
+            onClick={() => setIsModalOpen(true)}
+            className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <h2 className="text-xl font-semibold mb-6">Create new Project</h2>
+            <CirclePlus size={36} />
+          </div>
+        )}
 
-        {projects.map((project: any) => (
+        {filteredProjects.map((project: any) => (
           <div
             key={project.id}
             className="bg-white flex flex-col items-center p-4 gap-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"

@@ -2,27 +2,28 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createComment,
+  deleteTask,
   fetchAttachments,
   fetchComments,
   fetchUsers,
   getTaskById,
   updateTask,
+  updateTaskState,
 } from "../../services/projectApi";
 import { Editor } from "primereact/editor";
 import { FileUploader } from "../../components/FileUpload/FileUploader";
-import { stateColors } from "../../constants/uiColors";
+import { stateColors, taskPriorityColors } from "../../constants/uiColors";
 
-import {
-  Circle,
-  CircleArrowLeft,
-  CircleCheckBig,
-  Pin,
-  SquarePen,
-} from "lucide-react";
+import { CircleArrowLeft, SquarePen, Trash2 } from "lucide-react";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
 import { AccordionCard } from "../../components/Accordion/AccordionCard";
-import { Checkbox } from "@mui/material";
+import { Dropdown } from "../../components/DropdownButton/Dropdown";
+import { TodosPage } from "../TodosPage/TodosPage";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store/store";
+import { TooltipHint } from "../../components/Tooltip/TooltipHint";
+import toast from "react-hot-toast";
 
 interface Task {
   id: string;
@@ -31,50 +32,49 @@ interface Task {
   state?: string;
   priority: string;
   assignee?: any;
+  project: any;
 }
 
 export const TaskDetailPage = () => {
   const { id } = useParams();
   const userId = localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
   const navigate = useNavigate();
   const [task, setTask] = useState<Task>();
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [files, setFiles] = useState<any>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+  const [reasonText, setReasonText] = useState("");
+  const [pendingState, setPendingState] = useState<string | null>(null);
   const [users, setUsers] = useState<any[]>([]);
-
+  const currentUser = localStorage.getItem("userId");
+  const teamMembers = useSelector(
+    (state: RootState) => state.teamMembers.teamMembers
+  );
+  const isProjectManager = task?.project?.projectManager.id === userId;
+  const canUpdateTodoState =
+    isProjectManager || userRole === "ADMIN" || task?.assignee.id === userId;
   const modalFields = [
-    { name: "title", label: "Title", type: "text" },
-    { name: "description", label: "Description", type: "text" },
+    { name: "title", label: "Title", type: "text", visible: true },
+    { name: "description", label: "Description", type: "text", visible: true },
     {
       name: "priority",
       label: "Priority",
       type: "picker",
+      visible: true,
       isSingleSelect: true,
       options: ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
-    },
-    {
-      name: "state",
-      label: "State",
-      type: "picker",
-      isSingleSelect: true,
-      defaultValue: "BACKLOG",
-      options: [
-        "BACKLOG",
-        "IN_ANALYSIS",
-        "IN_DEVELOPMENT",
-        "CANCELLED",
-        "BLOCKED",
-        "COMPLETED",
-      ],
     },
     {
       name: "assignee",
       label: "Assignee",
       type: "picker",
+      visible: true,
       isSingleSelect: true,
-      options: users,
+      options: teamMembers,
     }, // Pass users as options
   ];
 
@@ -88,12 +88,14 @@ export const TaskDetailPage = () => {
             getTaskById(id, navigate),
             fetchAttachments(id, navigate),
             fetchComments(id, navigate),
+
             fetchUsers(navigate),
           ]);
 
         setTask(taskData);
         setFiles(attachments);
         setComments(commentsData);
+
         setUsers(usersData);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -108,12 +110,14 @@ export const TaskDetailPage = () => {
     const fullData = {
       ...formData,
       project: { id: localStorage.getItem("currentProjectId") },
+      state: task?.state,
       id: id,
     };
 
     try {
       const updatedTask = await updateTask(fullData, navigate);
       if (updatedTask) {
+        setTask(updatedTask);
         setIsModalOpen(false);
       }
     } catch (error) {
@@ -122,6 +126,18 @@ export const TaskDetailPage = () => {
     }
   };
 
+  const handleDeleteTask = async () => {
+    try {
+      await deleteTask(id, navigate);
+      setIsDeleteModalOpen(false);
+      toast.success("Project deleted successfully!");
+      navigate(-1);
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert("Error deleting project");
+      setIsDeleteModalOpen(false);
+    }
+  };
   const handleSendComment = async () => {
     const fullData = {
       text: commentText,
@@ -140,6 +156,51 @@ export const TaskDetailPage = () => {
       alert("Error creating comment");
     }
   };
+  const handleStateChange = async (newState: string) => {
+    if (["BLOCKED", "CANCELLED"].includes(newState)) {
+      // Check BLOCKED-specific constraint
+      if (
+        newState === "BLOCKED" &&
+        !["IN_ANALYSIS", "IN_DEVELOPMENT"].includes(task.state)
+      ) {
+        alert("You can only block a task that's in analysis or development.");
+        return;
+      }
+
+      // Open reason modal
+      setPendingState(newState);
+      setIsReasonModalOpen(true);
+      return;
+    }
+    try {
+      const updated = await updateTaskState(
+        { id: task.id, state: newState },
+        navigate
+      );
+      setTask(updated);
+    } catch (error) {
+      console.error("Error updating task state", error);
+      alert("State transition failed.");
+    }
+  };
+
+  const submitReasonAndUpdateState = async () => {
+    if (!pendingState || !task || !reasonText.trim()) return;
+
+    try {
+      const updated = await updateTaskState(
+        { id: task.id, state: pendingState, reason: reasonText },
+        navigate
+      );
+      setTask(updated);
+      setIsReasonModalOpen(false);
+      setReasonText("");
+      setPendingState(null);
+    } catch (error) {
+      console.error("Error submitting reason", error);
+      alert("Failed to update task with reason.");
+    }
+  };
 
   const processedFiles = useMemo(() => {
     return files?.map((file: any) => {
@@ -151,10 +212,10 @@ export const TaskDetailPage = () => {
   }, [files]);
 
   return (
-    <div className="w-full h-full flex flex-row">
+    <div className="w-full h-full flex flex-wrap lg:flex-nowrap">
       {task && (
-        <div className="w-1/2 p-6 flex flex-col gap-4">
-          <div className="flex flex-row">
+        <div className="w-full lg:w-1/2 p-6 flex flex-col gap-4">
+          <div className="flex flex-row items-start">
             <div className="left-32 py-4">
               <button
                 onClick={() => navigate(-1)} // update route if needed
@@ -163,13 +224,30 @@ export const TaskDetailPage = () => {
                 <CircleArrowLeft />
               </button>
             </div>
-            <div className="flex flex-col rounded-lg w-full p-8">
-              <div className="rounded-lg px-8 py-4 items-center flex rounded-b-none align-middle gap-2">
-                <h1 className="text-[24px] font-bold font-roboto">
-                  {task.title}
-                </h1>
+            <div className="flex flex-col rounded-lg w-full">
+              <div className="flex flex-row">
+                <div className="rounded-lg px-8 items-center flex rounded-b-none align-middle gap-2">
+                  <h1 className="text-[24px] font-bold font-roboto">
+                    {task.title}
+                  </h1>
+                </div>
+                {(userRole === "ADMIN" || isProjectManager) && (
+                  <div className="flex items-start p-4 gap-6">
+                    <TooltipHint text="Update Task">
+                      <button onClick={() => setIsModalOpen(true)}>
+                        <SquarePen size={24} />
+                      </button>
+                    </TooltipHint>
+                    <TooltipHint text="Delete Task">
+                      <button onClick={() => setIsDeleteModalOpen(true)}>
+                        <Trash2></Trash2>
+                      </button>
+                    </TooltipHint>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-row w-full gap-[160px] align-middle">
+
+              <div className="flex flex-row w-full justify-between align-middle">
                 <div className="flex flex-col items-start align-middle px-8 py-4 gap-6">
                   <h2 className="text-lg font-roboto">Assignee</h2>
                   <span className="font-roboto font-bold">
@@ -177,13 +255,33 @@ export const TaskDetailPage = () => {
                   </span>
                 </div>
                 <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
-                  <h2 className="text-lg font-roboto">Status</h2>
-                  <div
-                    className={`font-roboto font-bold p-2 rounded-md ${
+                  <h2 className="text-lg font-roboto">State</h2>
+                  <Dropdown
+                    label="State"
+                    customButtonClass={`font-roboto font-bold p-2 rounded-md ${
                       stateColors[task.state] || ""
                     }`}
+                    selectedOption={task.state}
+                    disabled={!canUpdateTodoState}
+                    onSelect={handleStateChange}
+                    options={[
+                      "BACKLOG",
+                      "IN_ANALYSIS",
+                      "IN_DEVELOPMENT",
+                      "CANCELLED",
+                      "BLOCKED",
+                      "COMPLETED",
+                    ]}
+                  ></Dropdown>
+                </div>
+                <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
+                  <h2 className="text-lg font-roboto">Priority</h2>
+                  <div
+                    className={`font-roboto font-bold p-2 rounded-md ${
+                      taskPriorityColors[task.priority] || ""
+                    }`}
                   >
-                    {task.state}
+                    {task.priority}
                   </div>
                 </div>
               </div>
@@ -191,11 +289,6 @@ export const TaskDetailPage = () => {
               <div className="flex justify-start p-8">
                 <h2 className="text-lg mb-4 font-roboto">{task.description}</h2>
               </div>
-            </div>
-            <div className="flex items-start p-8">
-              <button onClick={() => setIsModalOpen(true)}>
-                <SquarePen size={24} />
-              </button>
             </div>
           </div>
 
@@ -242,31 +335,43 @@ export const TaskDetailPage = () => {
             header="Comments"
             defaultExpanded={comments && comments.length}
             content={
-              <div className="flex flex-col items-start p-8">
+              <div className="flex flex-col p-8">
                 <div className="h-fit overflow-auto mb-6">
                   <ul>
                     {comments.map((comment) => (
                       <div
-                        key={comment.id}
-                        className="border w-[600px] rounded-xl shadow-sm p-4 mb-4 bg-white w-full"
+                        className={`flex flex-col ${
+                          currentUser === comment.commenter.id
+                            ? "items-end"
+                            : "items-start"
+                        }`}
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold text-gray-800 font-roboto">
-                            {comment.commenter?.name || "Unknown User"}
-                          </span>
-                          <div className="flex flex-col gap-2">
-                            <span className="text-sm text-gray-500 font-roboto">
-                              {new Date(comment.createdAt).toLocaleDateString()}
-                            </span>
-                            <span className="text-sm text-gray-500 font-roboto">
-                              {new Date(comment.createdAt).toLocaleTimeString()}
-                            </span>
-                          </div>
-                        </div>
                         <div
-                          className="prose prose-sm max-w-full flex items-start"
-                          dangerouslySetInnerHTML={{ __html: comment.text }}
-                        />
+                          key={comment.id}
+                          className="border w-[400px] rounded-xl shadow-sm p-4 mb-4 bg-white"
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-semibold text-gray-800 font-roboto">
+                              {comment.commenter?.name || "Unknown User"}
+                            </span>
+                            <div className="flex flex-col gap-2">
+                              <span className="text-sm text-gray-500 font-roboto">
+                                {new Date(
+                                  comment.createdAt
+                                ).toLocaleDateString()}
+                              </span>
+                              <span className="text-sm text-gray-500 font-roboto">
+                                {new Date(
+                                  comment.createdAt
+                                ).toLocaleTimeString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            className="prose prose-sm max-w-full flex items-start"
+                            dangerouslySetInnerHTML={{ __html: comment.text }}
+                          />
+                        </div>
                       </div>
                     ))}
                   </ul>
@@ -300,63 +405,13 @@ export const TaskDetailPage = () => {
           />
         </div>
       )}
-      <div className="w-1/2 p-6 flex flex-col gap-4">
-        <div className="flex flex-col p-8 gap-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2">
-          <div className="flex flex-row align-middle">
-            <Pin className="rotate-45" />
-            <div className="flex justify-center w-full">
-              <h1 className="text-lg font-bold  font-roboto">Todos</h1>
-            </div>
-          </div>
-
-          <ul>
-            <li className="mb-4">
-              <div className="flex flex-row justify-between items-center">
-                <div className="flex align-middle h-[32px]">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                </div>
-                <Checkbox
-                  defaultChecked
-                  icon={
-                    <span className="w-[32px] h-[32px]">
-                      <Circle className="w-full h-full" />
-                    </span>
-                  }
-                  checkedIcon={
-                    <span className="w-[32px] h-[32px]">
-                      <CircleCheckBig className="w-full h-full" />
-                    </span>
-                  }
-                />
-              </div>
-            </li>
-            <li>
-              <div className="flex flex-row justify-between align-middle items-center">
-                <div className="flex align-middle h-[32px]">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                </div>
-                <Checkbox
-                  defaultChecked
-                  icon={
-                    <span className="w-[32px] h-[32px]">
-                      <Circle className="w-full h-full" />
-                    </span>
-                  }
-                  checkedIcon={
-                    <span className="w-[32px] h-[32px]">
-                      <CircleCheckBig className="w-full h-full" />
-                    </span>
-                  }
-                />
-              </div>
-            </li>
-          </ul>
-        </div>
+      <div className="w-full lg:w-1/2 p-6 flex flex-col gap-4">
+        <TodosPage taskId={id} hasAuth={canUpdateTodoState} />
       </div>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="CREATE NEW TASK"
+        title="UPDATE TASK"
       >
         {task && id && (
           <Form
@@ -365,12 +420,59 @@ export const TaskDetailPage = () => {
             initialValues={{
               title: task.title,
               description: task.description,
-              state: task.state,
               priority: task.priority,
               assignee: task.assignee, // Ensure `assignee` exists in users list
             }}
           />
         )}
+      </Modal>
+      <Modal
+        isOpen={isReasonModalOpen}
+        onClose={() => {
+          setIsReasonModalOpen(false);
+          setReasonText("");
+        }}
+        title="Provide Reason"
+      >
+        <div className="flex flex-col gap-4">
+          <textarea
+            className="border rounded p-2 w-full"
+            rows={4}
+            placeholder="Please provide a reason..."
+            value={reasonText}
+            onChange={(e) => setReasonText(e.target.value)}
+          />
+          <button
+            className="bg-blue-600 text-white rounded px-4 py-2 self-end"
+            onClick={submitReasonAndUpdateState}
+            disabled={!reasonText.trim()}
+          >
+            Submit
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="DELETE PROJECT"
+      >
+        <span>Are you sure you want to delete this task ?</span>
+        <div className="flex flex-row justify-end gap-6">
+          <button
+            type="submit"
+            className="mt-4 bg-slate-500 text-white py-2 px-4 rounded"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            No
+          </button>
+          <button
+            type="submit"
+            className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
+            onClick={handleDeleteTask}
+          >
+            Yes
+          </button>
+        </div>
       </Modal>
     </div>
   );

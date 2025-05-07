@@ -1,5 +1,206 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  createTask,
+  fetchProjects,
+  fetchTasks,
+  fetchUsers,
+} from "../../services/projectApi";
+import { stateColors } from "../../constants/uiColors";
+import { Input } from "../../components/Input/Input";
+import { Select } from "../../components/Select/Select";
+import { CirclePlus } from "lucide-react";
+import { Modal } from "../../components/Modal/Modal";
+import { Form } from "../../components/Form/Form";
 
 export const Tasks = () => {
-  return <div>Tasks</div>;
+  const navigate = useNavigate();
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [searchByTitle, setSearchByTitle] = useState("");
+  const [selectedTaskState, setSelectedTaskState] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const userId = localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
+
+  const filteredProjects = projects.filter((project: any) => {
+    if (userRole === "ADMIN") {
+      return project;
+    }
+    if (userRole === "PROJECT_MANAGER") {
+      return project.projectManager.id === userId;
+    }
+  });
+
+  const modalFields = [
+    { name: "title", label: "Title", type: "text", visible: true },
+    { name: "description", label: "Description", type: "text", visible: true },
+    {
+      name: "project",
+      label: "Project",
+      type: "picker",
+      visible: true,
+      isSingleSelect: true,
+      options: filteredProjects,
+    },
+    {
+      name: "priority",
+      label: "Priority",
+      type: "picker",
+      visible: true,
+      isSingleSelect: true,
+      options: ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+    },
+    {
+      name: "assignee",
+      label: "Assignee",
+      type: "picker",
+      visible: true,
+      isSingleSelect: true,
+      options: users,
+    }, // Pass users as options
+  ];
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [projectsData, tasksData, usersData] = await Promise.all([
+          fetchProjects(navigate),
+          fetchTasks(navigate),
+          fetchUsers(navigate),
+        ]);
+
+        setProjects(projectsData);
+        setTasks(tasksData);
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        alert("Error loading data");
+      }
+    };
+
+    loadData();
+  }, [navigate]);
+
+  const handleCreateTask = async (formData: any) => {
+    try {
+      const newTask = await createTask(formData, navigate);
+      if (newTask) {
+        setTasks((prev) => [...prev, newTask]);
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      alert("Error creating task");
+    }
+  };
+  console.log("asdhA<VDHGVSF", selectedUser);
+
+  const filteredTasks = tasks.filter((task: any) => {
+    return (
+      task.title.toLowerCase().includes(searchByTitle.toLowerCase()) &&
+      task.state &&
+      (task.state.toString().includes(selectedTaskState) ||
+        selectedTaskState === "ALL") &&
+      task.assignee.name &&
+      (task.assignee.name
+        .toString()
+        .toLowerCase()
+        .includes(selectedUser && selectedUser.name.toString().toLowerCase()) ||
+        selectedUser === null)
+    );
+  });
+
+  return (
+    <div className="w-full h-full flex  flex-col">
+      <div className="flex flex-row justify-between items-center p-8">
+        <h1 className="text-2xl font-bold mb-4">Tasks</h1>
+        <div className="flex flex-row gap-4">
+          <Input
+            label="Search by title"
+            type="text"
+            name="title"
+            variant="outlined"
+            customClass="bg-white rounded-md"
+            value={searchByTitle}
+            onChange={(e) => setSearchByTitle(e.target.value)}
+          ></Input>
+          <Select
+            options={[
+              "ALL",
+              "BACKLOG",
+              "IN_ANALYSIS",
+              "IN_DEVELOPMENT",
+              "CANCELLED",
+              "BLOCKED",
+              "COMPLETED",
+            ]}
+            selectedValues={selectedTaskState}
+            displayLabel={false}
+            onChange={(selected) => setSelectedTaskState(selected)}
+            isSingleSelect={true}
+            customClass="bg-white rounded-md w-[200px]"
+            label="Filter By State"
+          ></Select>
+          <Select
+            options={users}
+            selectedValues={selectedUser}
+            displayLabel={false}
+            displayClearButtonForSingleSelect={true}
+            clearSelected={() => setSelectedUser(null)}
+            onChange={(selected) => setSelectedUser(selected)}
+            isSingleSelect={true}
+            customClass="bg-white rounded-md w-[200px]"
+            label="Filter By Assignee"
+          ></Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
+        {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER") && (
+          <div
+            onClick={() => setIsModalOpen(true)}
+            className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <h2 className="text-xl font-roboto font-semibold mb-6">
+              Create new Task
+            </h2>
+            <CirclePlus size={36} />
+          </div>
+        )}
+        {filteredTasks.map((task: any) => (
+          <div
+            key={task.id}
+            className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => navigate(`/taskDetail/${task.id}`)}
+          >
+            <h2 className="text-xl font-roboto font-semibold">{task.title}</h2>
+            <p className="text-gray-600 font-roboto mt-4">
+              Project: {task.project.title}
+            </p>
+            <p className="text-gray-600 font-roboto mt-4">
+              Assignee: {task.assignee.name}
+            </p>
+            <div
+              className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
+                stateColors[task.state] || ""
+              }`}
+            >
+              {task.state}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Modal for Creating Task */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="CREATE NEW TASK"
+      >
+        <Form fields={modalFields} onSubmit={handleCreateTask} />
+      </Modal>
+    </div>
+  );
 };
