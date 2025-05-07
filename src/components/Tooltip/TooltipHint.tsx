@@ -4,7 +4,7 @@ import React from "react";
 interface TooltipProps {
   children: any;
   text: string;
-  placement?: string;
+  placement?: any;
 }
 
 export const TooltipHint: React.FC<TooltipProps> = ({

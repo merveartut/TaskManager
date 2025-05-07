@@ -69,7 +69,7 @@ export const Select: React.FC<SelectProps> = ({
 
   const handleSelect = (value: string) => {
     if (!isSingleSelect && selectedValues.includes(value)) {
-      onChange(selectedValues.filter((v) => v !== value));
+      onChange(selectedValues.filter((v: any) => v !== value));
     } else {
       if (isSingleSelect) {
         onChange(value);
@@ -82,7 +82,7 @@ export const Select: React.FC<SelectProps> = ({
 
   const removeSelected = (e: any, value: any) => {
     e.preventDefault();
-    onChange(selectedValues.filter((v) => v !== value));
+    onChange(selectedValues.filter((v: any) => v !== value));
   };
   const getOptionLabel = (opt: any) => {
     if (typeof opt === "string") return opt;

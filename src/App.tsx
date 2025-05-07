@@ -9,13 +9,12 @@ import {
 } from "react-router-dom";
 import { Projects } from "./pages/DashboardPage/Projects";
 import { Navbar } from "./components/Navbar/Navbar";
-import { FileText, Folder, Home, List, Settings, User } from "lucide-react";
+import { Folder, List, Settings } from "lucide-react";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage/ProjectDetailPage";
 import { TaskDetailPage } from "./pages/TaskDetailPage/TaskDetailPage";
 import { SettingsPage } from "./pages/SettingsPage/SettingsPage";
 import { Tasks } from "./pages/DashboardPage/Tasks";
 import { Toaster } from "react-hot-toast";
-import Avatar from "@mui/material/Avatar";
 import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
 
 function App() {

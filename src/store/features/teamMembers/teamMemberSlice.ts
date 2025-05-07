@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getTeamMembers } from "../../../services/projectApi";
-import { useNavigate } from "react-router-dom";
 
 
 interface User {

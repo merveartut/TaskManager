@@ -45,8 +45,9 @@ export const TodosPage: React.FC<TodosProps> = ({
 
     try {
       const updatedTodo = await updateTodoState(id, state, navigate);
+      // @ts-ignore
       setTodos((prev) =>
-        prev.map((t) => (t.id === updatedTodo.id ? updatedTodo : t))
+        prev.map((t: any) => (t.id === updatedTodo.id ? updatedTodo : t))
       );
     } catch (error) {
       console.error("Error updating todo state", error);
@@ -66,6 +67,7 @@ export const TodosPage: React.FC<TodosProps> = ({
     try {
       const newTodo = await createTodo(fullData, navigate);
       if (newTodo) {
+        // @ts-ignore
         setTodos((prev) => [...prev, newTodo]);
         setTodoText("");
         setIsTodoModalOpen(false);
@@ -93,7 +95,7 @@ export const TodosPage: React.FC<TodosProps> = ({
       </div>
 
       <ul>
-        {todos.map((todo, index) => (
+        {todos.map((todo: any, index) => (
           <li key={index}>
             <div className="flex flex-row justify-between align-middle items-center">
               <div className="flex align-middle h-[32px]">{todo.text}</div>

@@ -169,7 +169,7 @@ export const Projects: React.FC = () => {
             options={["ALL", "IN_PROGRESS", "CANCELLED", "COMPLETED"]}
             selectedValues={selectedProjectStatus}
             displayLabel={false}
-            onChange={(selected) => setSelectedProjectStatus(selected)}
+            onChange={(selected: any) => setSelectedProjectStatus(selected)}
             isSingleSelect={true}
             customClass="bg-white rounded-md w-[200px]"
             label="Filter By State"

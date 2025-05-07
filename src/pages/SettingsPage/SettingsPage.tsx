@@ -1,5 +1,5 @@
 import { CirclePlus, Delete } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
 import { createUser, deleteUser, fetchUsers } from "../../services/projectApi";
@@ -13,7 +13,7 @@ export const SettingsPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
     useState(false);
-  const [selectedUser, setSelectedUser] = useState();
+  const [selectedUser, setSelectedUser] = useState<any>();
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ export const SettingsPage = () => {
     loadData();
   }, [navigate]);
 
-  const modalFields = [
+  const modalFields: any = [
     { name: "name", label: "Name", type: "text", visible: true },
     { name: "password", label: "Password", type: "text", visible: true },
     {
@@ -59,8 +59,6 @@ export const SettingsPage = () => {
   };
 
   const handleDeleteUser = async () => {
-    console.log("kıjgdkftttflkhfg", selectedUser);
-
     try {
       await deleteUser(selectedUser.id, navigate);
       setIsDeleteConfirmModalOpen(false);
@@ -90,7 +88,7 @@ export const SettingsPage = () => {
           <CirclePlus className="text-green-700" />
           <span className="font-semibold text-green-700"> Add New User</span>
         </div>
-        {users.map((user) => (
+        {users.map((user: any) => (
           <div
             key={user.id}
             className="grid grid-cols-4 gap-12 items-center bg-white p-4 border-t border-gray-200 hover:shadow transition-shadow cursor-pointer"
@@ -132,7 +130,7 @@ export const SettingsPage = () => {
           displayLabel={true}
           isSingleSelect={true}
           selectedValues={selectedUser}
-          onChange={(selected) => setSelectedUser(selected)}
+          onChange={(selected: any) => setSelectedUser(selected)}
         />
         <button
           type="submit"

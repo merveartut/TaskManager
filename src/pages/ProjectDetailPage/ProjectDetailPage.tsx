@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
-import {
-  CircleArrowLeft,
-  CirclePlus,
-  DeleteIcon,
-  SquarePen,
-  Trash2,
-} from "lucide-react";
+import { CircleArrowLeft, CirclePlus, SquarePen, Trash2 } from "lucide-react";
 import { Input } from "../../components/Input/Input";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -24,7 +18,7 @@ import {
   deleteProject,
 } from "../../services/projectApi";
 import { Select } from "../../components/Select/Select";
-import { Avatar, AvatarGroup, ButtonGroup, Divider } from "@mui/material";
+import { Avatar, AvatarGroup, Divider } from "@mui/material";
 import { projectStatusColors, stateColors } from "../../constants/uiColors";
 import { TooltipHint } from "../../components/Tooltip/TooltipHint";
 
@@ -45,7 +39,7 @@ export const ProjectDetailPage = () => {
 
   const [tasks, setTasks] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [project, setProject] = useState<Project>();
+  const [project, setProject] = useState<Project | any>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -58,7 +52,7 @@ export const ProjectDetailPage = () => {
   const userId = localStorage.getItem("userId");
 
   const isProjectManager = project?.projectManager.id === userId;
-  const modalFields = [
+  const modalFields: any = [
     { name: "title", label: "Title", type: "text", visible: true },
     { name: "description", label: "Description", type: "text", visible: true },
     {
@@ -149,6 +143,7 @@ export const ProjectDetailPage = () => {
   };
   const handleDeleteProject = async () => {
     try {
+      // @ts-ignore
       await deleteProject(id, navigate);
       setIsDeleteModalOpen(false);
       toast.success("Project deleted successfully!");
@@ -304,7 +299,7 @@ export const ProjectDetailPage = () => {
             ]}
             selectedValues={selectedTaskState}
             displayLabel={false}
-            onChange={(selected) => setSelectedTaskState(selected)}
+            onChange={(selected: any) => setSelectedTaskState(selected)}
             isSingleSelect={true}
             customClass="bg-white rounded-md w-[200px]"
             label="Filter By State"

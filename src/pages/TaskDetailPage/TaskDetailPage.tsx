@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createComment,
   deleteTask,
   fetchAttachments,
   fetchComments,
-  fetchUsers,
   getTaskById,
   updateTask,
   updateTaskState,
@@ -20,8 +19,8 @@ import { Form } from "../../components/Form/Form";
 import { AccordionCard } from "../../components/Accordion/AccordionCard";
 import { Dropdown } from "../../components/DropdownButton/Dropdown";
 import { TodosPage } from "../TodosPage/TodosPage";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../store/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import { TooltipHint } from "../../components/Tooltip/TooltipHint";
 import toast from "react-hot-toast";
 
@@ -36,11 +35,11 @@ interface Task {
 }
 
 export const TaskDetailPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<any>();
   const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
   const navigate = useNavigate();
-  const [task, setTask] = useState<Task>();
+  const [task, setTask] = useState<Task | any>();
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [files, setFiles] = useState<any>();
@@ -49,7 +48,6 @@ export const TaskDetailPage = () => {
   const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
   const [reasonText, setReasonText] = useState("");
   const [pendingState, setPendingState] = useState<string | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
   const currentUser = localStorage.getItem("userId");
   const teamMembers = useSelector(
     (state: RootState) => state.teamMembers.teamMembers
@@ -57,7 +55,7 @@ export const TaskDetailPage = () => {
   const isProjectManager = task?.project?.projectManager.id === userId;
   const canUpdateTodoState =
     isProjectManager || userRole === "ADMIN" || task?.assignee.id === userId;
-  const modalFields = [
+  const modalFields: any = [
     { name: "title", label: "Title", type: "text", visible: true },
     { name: "description", label: "Description", type: "text", visible: true },
     {
@@ -83,20 +81,15 @@ export const TaskDetailPage = () => {
 
     const loadData = async () => {
       try {
-        const [taskData, attachments, commentsData, usersData] =
-          await Promise.all([
-            getTaskById(id, navigate),
-            fetchAttachments(id, navigate),
-            fetchComments(id, navigate),
-
-            fetchUsers(navigate),
-          ]);
+        const [taskData, attachments, commentsData] = await Promise.all([
+          getTaskById(id, navigate),
+          fetchAttachments(id, navigate),
+          fetchComments(id, navigate),
+        ]);
 
         setTask(taskData);
         setFiles(attachments);
         setComments(commentsData);
-
-        setUsers(usersData);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
@@ -128,6 +121,7 @@ export const TaskDetailPage = () => {
 
   const handleDeleteTask = async () => {
     try {
+      // @ts-ignore
       await deleteTask(id, navigate);
       setIsDeleteModalOpen(false);
       toast.success("Project deleted successfully!");
@@ -148,6 +142,7 @@ export const TaskDetailPage = () => {
     try {
       const newComment = await createComment(fullData, navigate);
       if (newComment) {
+        // @ts-ignore
         setComments((prev) => [...prev, newComment]);
         setCommentText("");
       }
@@ -161,6 +156,7 @@ export const TaskDetailPage = () => {
       // Check BLOCKED-specific constraint
       if (
         newState === "BLOCKED" &&
+        // @ts-ignore
         !["IN_ANALYSIS", "IN_DEVELOPMENT"].includes(task.state)
       ) {
         alert("You can only block a task that's in analysis or development.");
@@ -174,6 +170,7 @@ export const TaskDetailPage = () => {
     }
     try {
       const updated = await updateTaskState(
+        // @ts-ignore
         { id: task.id, state: newState },
         navigate
       );
@@ -302,7 +299,7 @@ export const TaskDetailPage = () => {
                     <FileUploader taskId={id} userId={userId} label=" " />
                   </div>
                   {processedFiles &&
-                    processedFiles.map((file) => (
+                    processedFiles.map((file: any) => (
                       <li
                         key={file.id}
                         className="flex flex-col items-center w-32"
@@ -333,12 +330,12 @@ export const TaskDetailPage = () => {
           />
           <AccordionCard
             header="Comments"
-            defaultExpanded={comments && comments.length}
+            defaultExpanded={comments.length > 0}
             content={
               <div className="flex flex-col p-8">
                 <div className="h-fit overflow-auto mb-6">
                   <ul>
-                    {comments.map((comment) => (
+                    {comments.map((comment: any) => (
                       <div
                         className={`flex flex-col ${
                           currentUser === comment.commenter.id
@@ -380,7 +377,7 @@ export const TaskDetailPage = () => {
                   <div className="max-h-[120px] w-full">
                     <Editor
                       value={commentText}
-                      onTextChange={(e) => setCommentText(e.htmlValue)}
+                      onTextChange={(e: any) => setCommentText(e.htmlValue)}
                       className="h-full w-full"
                     />
                   </div>
@@ -406,7 +403,7 @@ export const TaskDetailPage = () => {
         </div>
       )}
       <div className="w-full lg:w-1/2 p-6 flex flex-col gap-4">
-        <TodosPage taskId={id} hasAuth={canUpdateTodoState} />
+        {id && <TodosPage taskId={id} hasAuth={canUpdateTodoState} />}
       </div>
       <Modal
         isOpen={isModalOpen}

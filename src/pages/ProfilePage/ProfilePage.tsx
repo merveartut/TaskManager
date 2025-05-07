@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
   changePassword,
-  fetchProjectsByManager,
   fetchProjectsByTeamMember,
   fetchTasksByUserId,
   getUserById,
@@ -21,7 +20,7 @@ import { TooltipHint } from "../../components/Tooltip/TooltipHint";
 
 export const ProfilePage = () => {
   const { id } = useParams();
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<any>();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -38,7 +37,7 @@ export const ProfilePage = () => {
 
   const modalFields = [
     {
-      name: "currentPassword",
+      name: "oldPassword",
       label: "Current Password",
       type: "password",
       visible: true,
@@ -76,7 +75,7 @@ export const ProfilePage = () => {
     loadData();
   }, [id]);
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = tasks.filter((task: any) => {
     return (
       task.title.toLowerCase().includes(searchByTaskTitle.toLowerCase()) &&
       task.state &&
@@ -98,13 +97,7 @@ export const ProfilePage = () => {
 
   const handleChangePassword = async (formData: any) => {
     try {
-      await changePassword(
-        {
-          oldPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        },
-        navigate
-      );
+      await changePassword(formData);
       toast.success("Password updated successfully!");
       setIsPasswordModalOpen(false);
     } catch (error: any) {
@@ -180,8 +173,8 @@ export const ProfilePage = () => {
           <Divider /> <span>There is no projects data</span>
         </div>
       ) : (
-        <div>
-          <Divider></Divider>
+        <>
+          <Divider />
           <div className="flex flex-row justify-between items-center p-8">
             <h1 className="text-[24px] font-bold px-8 font-roboto">Projects</h1>
             <div className="flex flex-row gap-4">
@@ -198,14 +191,14 @@ export const ProfilePage = () => {
                 options={["ALL", "IN_PROGRESS", "CANCELLED", "COMPLETED"]}
                 selectedValues={selectedProjectStatus}
                 displayLabel={false}
-                onChange={(selected) => setSelectedProjectStatus(selected)}
+                onChange={(selected: any) => setSelectedProjectStatus(selected)}
                 isSingleSelect={true}
                 customClass="bg-white rounded-md w-[200px]"
                 label="Filter By Status"
               ></Select>
             </div>
           </div>
-        </div>
+        </>
       )}
       {projects.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
@@ -259,7 +252,7 @@ export const ProfilePage = () => {
               ]}
               selectedValues={selectedTaskState}
               displayLabel={false}
-              onChange={(selected) => setSelectedTaskState(selected)}
+              onChange={(selected: any) => setSelectedTaskState(selected)}
               isSingleSelect={true}
               customClass="bg-white rounded-md w-[200px]"
               label="Filter By State"

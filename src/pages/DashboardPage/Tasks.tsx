@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createTask,
@@ -20,7 +20,7 @@ export const Tasks = () => {
   const [users, setUsers] = useState([]);
   const [searchByTitle, setSearchByTitle] = useState("");
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
-  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<string | any>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
@@ -34,7 +34,7 @@ export const Tasks = () => {
     }
   });
 
-  const modalFields = [
+  const modalFields: any = [
     { name: "title", label: "Title", type: "text", visible: true },
     { name: "description", label: "Description", type: "text", visible: true },
     {
@@ -88,6 +88,7 @@ export const Tasks = () => {
     try {
       const newTask = await createTask(formData, navigate);
       if (newTask) {
+        // @ts-ignore
         setTasks((prev) => [...prev, newTask]);
         setIsModalOpen(false);
       }
@@ -139,7 +140,7 @@ export const Tasks = () => {
             ]}
             selectedValues={selectedTaskState}
             displayLabel={false}
-            onChange={(selected) => setSelectedTaskState(selected)}
+            onChange={(selected: any) => setSelectedTaskState(selected)}
             isSingleSelect={true}
             customClass="bg-white rounded-md w-[200px]"
             label="Filter By State"

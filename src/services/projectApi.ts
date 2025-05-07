@@ -285,7 +285,7 @@ export const fetchProjectsByTeamMember = async(userId:string, navigate: any) => 
   return response.json();
 }
 
-export const changePassword = async (data: any, navigate: any) => {
+export const changePassword = async (data: any) => {
   const token = localStorage.getItem("token");
   console.log("Sending Authorization Header:", `Bearer ${token}`);
 
