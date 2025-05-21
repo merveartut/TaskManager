@@ -120,7 +120,10 @@ export const createUser = async (data: any, navigate:any) => {
     body: JSON.stringify(data)
   })
   if (handleAuthRedirect(response, navigate)) return null;
-  if (!response.ok) throw new Error("Failed to create user");
+   if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create user");
+  }
   return response.json();
 }
 
