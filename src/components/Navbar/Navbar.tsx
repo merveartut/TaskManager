@@ -18,7 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({ items, userInfo }) => {
 
   const getInitials = (name: string) => {
     console.log("is this one", name);
-    if (!userInfo) {
+    if (!name) {
       return null;
     }
     const parts = name.trim().split(" ");
