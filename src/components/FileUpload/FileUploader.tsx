@@ -8,6 +8,7 @@ interface FileProps {
   onUploadComplete?: () => void;
 }
 
+const API_BASE = process.env.REACT_APP_API_URL;
 export const FileUploader: React.FC<FileProps> = ({
   taskId,
   userId,
@@ -23,13 +24,10 @@ export const FileUploader: React.FC<FileProps> = ({
     formData.append("userId", userId);
 
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/attachments/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/attachments/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (response.ok) {
         alert("File uploaded!");

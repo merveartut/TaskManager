@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = process.env.REACT_APP_API_URL
+
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -289,7 +290,7 @@ export const changePassword = async (data: any) => {
   const token = localStorage.getItem("token");
   console.log("Sending Authorization Header:", `Bearer ${token}`);
 
-  const response = await fetch(`http://localhost:8080/auth/change-password`, {
+  const response = await fetch(`${API_BASE}/auth/change-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
