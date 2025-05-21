@@ -25,7 +25,7 @@ export const fetchProjectById = async (id: string, navigate: any) => {
 };
 
 export const fetchUsers = async (navigate: any) => {
-  const response = await fetch(`${API_BASE}/users/v1`, {
+  const response = await fetch(`${API_BASE}/api/users/v1`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return [];
@@ -114,7 +114,7 @@ export const getTeamMembers = async (id: string, navigate:any) => {
 }
 
 export const createUser = async (data: any, navigate:any) => {
-  const response = await fetch(`${API_BASE}/users/v1`, {
+  const response = await fetch(`${API_BASE}api/users/v1`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
