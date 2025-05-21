@@ -183,6 +183,7 @@ export const TaskDetailPage = () => {
   };
 
   const submitReasonAndUpdateState = async () => {
+    console.log("orrrrrrrrr this one");
     if (!pendingState || !task || !reasonText.trim()) return;
 
     try {

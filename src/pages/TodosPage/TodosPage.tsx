@@ -56,6 +56,7 @@ export const TodosPage: React.FC<TodosProps> = ({
   };
 
   const handleAddTodo = async () => {
+    console.log("bu mu ?");
     if (!todoText || !todoText.trim()) return;
 
     const fullData = {

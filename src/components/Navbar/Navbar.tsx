@@ -17,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({ items, userInfo }) => {
   const navigate = useNavigate();
 
   const getInitials = (name: string) => {
+    console.log("is this one", name);
     if (!userInfo) {
       return null;
     }
