@@ -19,7 +19,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # React build klasörünü nginx’in serve ettiği dizine kopyala
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # 80 portunu aç
 EXPOSE 80
