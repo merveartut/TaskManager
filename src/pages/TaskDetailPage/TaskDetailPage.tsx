@@ -33,6 +33,7 @@ interface Task {
   assignee?: any;
   project: any;
 }
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const TaskDetailPage = () => {
   const { id } = useParams<any>();
@@ -182,6 +183,7 @@ export const TaskDetailPage = () => {
   };
 
   const submitReasonAndUpdateState = async () => {
+    console.log("orrrrrrrrr this one");
     if (!pendingState || !task || !reasonText.trim()) return;
 
     try {
@@ -202,7 +204,7 @@ export const TaskDetailPage = () => {
   const processedFiles = useMemo(() => {
     return files?.map((file: any) => {
       const fileName = file.filePath.split(/[\\/]/).pop();
-      const fileUrl = `http://localhost:8080/api/attachments/files/${fileName}`;
+      const fileUrl = `${API_BASE}/api/attachments/files/${fileName}`;
       const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName);
       return { ...file, fileName, fileUrl, isImage };
     });

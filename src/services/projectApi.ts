@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_URL;
+
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -15,7 +16,7 @@ const handleAuthRedirect = (response: Response, navigate: any) => {
 };
 
 export const fetchProjectById = async (id: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/projects/v1/${id}`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1/${id}`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return null;
@@ -24,7 +25,7 @@ export const fetchProjectById = async (id: string, navigate: any) => {
 };
 
 export const fetchUsers = async (navigate: any) => {
-  const response = await fetch(`${API_BASE}/users/v1`, {
+  const response = await fetch(`${API_BASE}/api/users/v1`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return [];
@@ -33,7 +34,7 @@ export const fetchUsers = async (navigate: any) => {
 };
 
 export const fetchTasksByProjectId = async (id: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/tasks/v1/project/${id}`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1/project/${id}`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return [];
@@ -42,7 +43,7 @@ export const fetchTasksByProjectId = async (id: string, navigate: any) => {
 };
 
 export const getTaskById = async (id: string, navigate: any) => {
-    const response = await fetch(`${API_BASE}/tasks/v1/task/${id}`, {
+    const response = await fetch(`${API_BASE}/api/tasks/v1/task/${id}`, {
         headers: getAuthHeaders(),
     });
     if (handleAuthRedirect(response, navigate)) return [];
@@ -53,7 +54,7 @@ export const getTaskById = async (id: string, navigate: any) => {
 export const createTask = async (data: any, navigate: any) => {
   console.log("jdhjdfg", data);
   
-  const response = await fetch(`${API_BASE}/tasks/v1`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -64,7 +65,7 @@ export const createTask = async (data: any, navigate: any) => {
 };
 
 export const createComment = async (data: any, navigate: any) => {
-  const response = await fetch(`${API_BASE}/comments/v1/add-comment`, {
+  const response = await fetch(`${API_BASE}/api/comments/v1/add-comment`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -75,7 +76,7 @@ export const createComment = async (data: any, navigate: any) => {
 }
 
 export const fetchAttachments = async (id: string, navigate: any) => {
-const response = await fetch(`${API_BASE}/attachments/v1/task?taskId=${id}`, {
+const response = await fetch(`${API_BASE}/api/attachments/v1/task?taskId=${id}`, {
   headers: getAuthHeaders(),
 })
 if (handleAuthRedirect(response, navigate)) return [];
@@ -84,7 +85,7 @@ return response.json();
 }
 
 export const fetchComments = async (id: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/comments/v1/task?taskId=${id}`, {
+  const response = await fetch(`${API_BASE}/api/comments/v1/task?taskId=${id}`, {
     headers: getAuthHeaders(),
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -93,7 +94,7 @@ export const fetchComments = async (id: string, navigate: any) => {
 }
 
 export const updateTask = async (data: any, navigate: any) => {  
-  const response = await fetch(`${API_BASE}/tasks/v1/update`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1/update`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -104,7 +105,7 @@ export const updateTask = async (data: any, navigate: any) => {
 }
 
 export const getTeamMembers = async (id: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/projects/v1/team-members?id=${id}`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1/team-members?id=${id}`, {
     headers: getAuthHeaders(),
   })
   if (handleAuthRedirect(response, navigate)) return null;
@@ -113,18 +114,21 @@ export const getTeamMembers = async (id: string, navigate:any) => {
 }
 
 export const createUser = async (data: any, navigate:any) => {
-  const response = await fetch(`${API_BASE}/users/v1`, {
+  const response = await fetch(`${API_BASE}/api/users/v1`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
   })
   if (handleAuthRedirect(response, navigate)) return null;
-  if (!response.ok) throw new Error("Failed to create user");
+   if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create user");
+  }
   return response.json();
 }
 
 export const updateProject = async (data:any, navigate:any) => {
-  const response = await fetch(`${API_BASE}/projects/v1`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -141,7 +145,7 @@ export const updateTaskState = async(data: { id: string; state: string; reason?:
   queryParams.append("state", state);
   if (reason) queryParams.append("reason", reason);
   const response = await fetch(
-    `${API_BASE}/tasks/v1/set-state?${queryParams.toString()}`,
+    `${API_BASE}/api/tasks/v1/set-state?${queryParams.toString()}`,
     {
       method: "PUT",
       headers: getAuthHeaders()
@@ -153,7 +157,7 @@ export const updateTaskState = async(data: { id: string; state: string; reason?:
 }
 
 export const createTodo = async(data: any, navigate:any) => {
-  const response = await fetch(`${API_BASE}/todos/v1`, {
+  const response = await fetch(`${API_BASE}/api/todos/v1`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -164,7 +168,7 @@ export const createTodo = async(data: any, navigate:any) => {
 }
 
 export const fetchTodos = async (taskId: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/todos/v1?taskId=${taskId}`, {
+  const response = await fetch(`${API_BASE}/api/todos/v1?taskId=${taskId}`, {
     headers: getAuthHeaders(),
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -173,7 +177,7 @@ export const fetchTodos = async (taskId: string, navigate: any) => {
 }
 
 export const updateTodoState = async(id: string, state: boolean, navigate:any) => {
-  const response = await fetch(`${API_BASE}/todos/v1/update-state?id=${id}&state=${state}`, {
+  const response = await fetch(`${API_BASE}/api/todos/v1/update-state?id=${id}&state=${state}`, {
     method: "PUT",
     headers: getAuthHeaders()
   })
@@ -183,7 +187,7 @@ export const updateTodoState = async(id: string, state: boolean, navigate:any) =
 }
 
 export const fetchTasks = async(navigate:any) => {
-  const response = await fetch(`${API_BASE}/tasks/v1`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1`, {
     headers: getAuthHeaders()
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -192,7 +196,7 @@ export const fetchTasks = async(navigate:any) => {
 }
 
 export const deleteProject = async(id: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/projects/v1?id=${id}`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1?id=${id}`, {
     method: "DELETE",
     headers: getAuthHeaders()
   })
@@ -201,7 +205,7 @@ export const deleteProject = async(id: string, navigate:any) => {
 }
 
 export const deleteTask = async(id: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/tasks/v1?id=${id}`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1?id=${id}`, {
     method: "DELETE",
     headers: getAuthHeaders()
   })
@@ -210,7 +214,7 @@ export const deleteTask = async(id: string, navigate:any) => {
 }
 
 export const getUserById = async(id: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/users/v1/${id}`, {
+  const response = await fetch(`${API_BASE}/api/users/v1/${id}`, {
     method:"GET",
     headers: getAuthHeaders()
   })
@@ -221,7 +225,7 @@ export const getUserById = async(id: string, navigate:any) => {
 }
 
 export const fetchTasksByUserId = async (id: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/tasks/v1/user/${id}`, {
+  const response = await fetch(`${API_BASE}/api/tasks/v1/user/${id}`, {
     headers: getAuthHeaders(),
   });
   if (handleAuthRedirect(response, navigate)) return [];
@@ -230,7 +234,7 @@ export const fetchTasksByUserId = async (id: string, navigate: any) => {
 };
 
 export const fetchProjects = async(navigate:any) => {
-  const response = await fetch(`${API_BASE}/projects/v1`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1`, {
     headers: getAuthHeaders()
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -239,7 +243,7 @@ export const fetchProjects = async(navigate:any) => {
 }
 
 export const fetchProjectsByManager = async(userId:string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/projects/v1/by-manager?userId=${userId}`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1/by-manager?userId=${userId}`, {
     headers: getAuthHeaders()
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -248,7 +252,7 @@ export const fetchProjectsByManager = async(userId:string, navigate: any) => {
 }
 
 export const deleteUser = async(userId: string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/users/v1?id=${userId}`, {
+  const response = await fetch(`${API_BASE}/api/users/v1?id=${userId}`, {
     method: "DELETE",
     headers: getAuthHeaders()
   })
@@ -257,7 +261,7 @@ export const deleteUser = async(userId: string, navigate: any) => {
 }
 
 export const updateUserEmail = async(id: string, email: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/users/v1/update-email?id=${id}&email=${email}`, {
+  const response = await fetch(`${API_BASE}/api/users/v1/update-email?id=${id}&email=${email}`, {
     method: "PUT",
     headers: getAuthHeaders()
   })
@@ -267,7 +271,7 @@ export const updateUserEmail = async(id: string, email: string, navigate:any) =>
 }
 
 export const updateUserName = async(id: string, name: string, navigate:any) => {
-  const response = await fetch(`${API_BASE}/users/v1/update-name?id=${id}&name=${name}`, {
+  const response = await fetch(`${API_BASE}/api/users/v1/update-name?id=${id}&name=${name}`, {
     method: "PUT",
     headers: getAuthHeaders()
   })
@@ -277,7 +281,7 @@ export const updateUserName = async(id: string, name: string, navigate:any) => {
 }
 
 export const fetchProjectsByTeamMember = async(userId:string, navigate: any) => {
-  const response = await fetch(`${API_BASE}/projects/v1/by-team-member?userId=${userId}`, {
+  const response = await fetch(`${API_BASE}/api/projects/v1/by-team-member?userId=${userId}`, {
     headers: getAuthHeaders()
   })
   if (handleAuthRedirect(response, navigate)) return [];
@@ -289,7 +293,7 @@ export const changePassword = async (data: any) => {
   const token = localStorage.getItem("token");
   console.log("Sending Authorization Header:", `Bearer ${token}`);
 
-  const response = await fetch(`http://localhost:8080/auth/change-password`, {
+  const response = await fetch(`${API_BASE}/auth/change-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

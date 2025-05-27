@@ -7,12 +7,14 @@ const loginFields = [
   { name: "username", label: "Username", type: "username", visible: true },
   { name: "password", label: "Password", type: "password", visible: true },
 ];
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  console.log("API_BASE", API_BASE);
   const handleSubmit = async (formData: any) => {
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

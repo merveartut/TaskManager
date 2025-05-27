@@ -15,6 +15,7 @@ interface Project {
   teamMembers: string;
   status?: string;
 }
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const Projects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -70,7 +71,7 @@ export const Projects: React.FC = () => {
 
     const fetchProjects = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/projects/v1", {
+        const response = await fetch(`${API_BASE}/api/projects/v1`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -93,7 +94,7 @@ export const Projects: React.FC = () => {
 
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/v1", {
+        const response = await fetch(`${API_BASE}/api/users/v1`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -121,7 +122,7 @@ export const Projects: React.FC = () => {
   const handleCreateProject = async (formData: Record<string, any>) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8080/api/projects/v1", {
+      const response = await fetch(`${API_BASE}/api/projects/v1`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
