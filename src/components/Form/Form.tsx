@@ -79,7 +79,7 @@ export const Form: React.FC<FormProps> = ({
       )}
       <button
         type="submit"
-        className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
+        className="mt-4 bg-orange-800 text-white py-2 px-4 rounded"
       >
         Submit
       </button>

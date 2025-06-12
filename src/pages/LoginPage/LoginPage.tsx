@@ -43,15 +43,29 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleExplore = () => {};
   return (
-    <div className="w-full h-full flex">
-      <div className="w-1/2">
-        <img src={image} className="object-cover w-full h-[1000px]"></img>
+    <div className="w-full flex">
+      <div className="w-1/2 max-h-screen">
+        <img src={image} className="object-cover w-full h-screen"></img>
       </div>
-      <div className="w-1/2 flex items-center flex flex-col justify-center gap-4">
-        <h1 className="text-2xl font-bol">Login</h1>
-        <h1 className="text-xl font-bol italic">I'll help</h1>
-        <Form fields={loginFields} onSubmit={handleSubmit} />
+
+      <div className="w-1/2 flex items-center flex-col justify-center gap-24">
+        <div className="flex items-center">
+          <span className="text-3xl font-semibold font-roboto">MOP</span>
+        </div>
+
+        <div className="flex flex-col items-center justify-start gap-4">
+          <h1 className="text-2xl ">Login</h1>
+          <h1 className="text-xl  italic">MOP up tasks!</h1>
+          <Form fields={loginFields} onSubmit={handleSubmit} />
+          <span
+            className="font-roboto text-purple-800 cursor-pointer hover:text-purple-600"
+            onClick={handleExplore}
+          >
+            I just want to explore the app.
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -71,19 +71,17 @@ function AppContent() {
           },
         }}
       />
-      <div className="flex-1 overflow-auto">
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/profile/:id" element={<ProfilePage />} />
-          <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
-          <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="*" element={<Navigate to="/login" />} />{" "}
-          {/* Redirect unknown routes to login */}
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
+        <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
+        <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="*" element={<Navigate to="/login" />} />{" "}
+        {/* Redirect unknown routes to login */}
+      </Routes>
     </div>
   );
 }
