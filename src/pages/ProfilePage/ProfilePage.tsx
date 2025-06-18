@@ -129,8 +129,8 @@ export const ProfilePage = () => {
     }
   };
   return (
-    <div className="w-full h-full flex  flex-col">
-      <div className="flex flex-col items-start justify-start p-8">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex flex-col items-start justify-start md:p-8 lg:p-8">
         <div className="flex flex-row align-middle gap-2">
           <div className="rounded-lg px-8 py-4 items-center flex rounded-b-none align-middle gap-2">
             <h1 className="text-[24px] font-bold font-roboto">
@@ -143,7 +143,7 @@ export const ProfilePage = () => {
             </TooltipHint>
           </div>
         </div>
-        <div className="flex flex-row w-full gap-[160px] align-middle items-center">
+        <div className="flex flex-row w-full md:gap-[160px] lg:gap-[160px] align-middle items-center flex-wrap">
           <div className="flex flex-row items-center align-middle px-8 py-4 gap-6">
             <h2 className="text-lg font-roboto">Role:</h2>
             <span className="font-roboto font-bold">{user && user.role}</span>
@@ -159,7 +159,7 @@ export const ProfilePage = () => {
           </div>
           <div className="px-8 py-4">
             <button
-              className="bg-blue-600 text-white rounded px-4 py-2"
+              className="bg-blue-700 text-white rounded hover:bg-blue-600 md:px-4 px-2 py-2 md:text-md text-sm"
               onClick={() => setIsPasswordModalOpen(true)}
             >
               Change Password
@@ -175,9 +175,11 @@ export const ProfilePage = () => {
       ) : (
         <>
           <Divider />
-          <div className="flex flex-row justify-between items-center p-8">
-            <h1 className="text-[24px] font-bold px-8 font-roboto">Projects</h1>
-            <div className="flex flex-row gap-4">
+          <div className="flex flex-row justify-between items-center p-8 flex-wrap gap-4">
+            <h1 className="text-[24px] font-bold md:px-8 font-roboto">
+              Projects
+            </h1>
+            <div className="flex flex-row gap-4 flex-wrap">
               <Input
                 label="Search by title"
                 type="text"
@@ -223,13 +225,15 @@ export const ProfilePage = () => {
         </div>
       )}
       {<Divider />}
-      {filteredTasks.length === 0 ? (
-        <div className="p-8">
-          <span>There is no tasks data</span>
-        </div>
-      ) : (
-        <div className="flex flex-row justify-between items-center p-8">
-          <h1 className="text-[24px] font-bold px-8 font-roboto">Tasks</h1>
+
+      <div className="flex flex-row justify-between items-center p-8 flex-wrap">
+        <h1 className="text-[24px] font-bold md:px-8 font-roboto">Tasks</h1>
+
+        {filteredTasks.length === 0 ? (
+          <div className="p-8 w-full">
+            <span>There is no tasks data</span>
+          </div>
+        ) : (
           <div className="flex flex-row gap-4">
             <Input
               label="Search by title"
@@ -258,8 +262,8 @@ export const ProfilePage = () => {
               label="Filter By State"
             ></Select>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {filteredTasks.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">

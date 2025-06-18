@@ -50,7 +50,10 @@ export const Form: React.FC<FormProps> = ({
     onSubmit(formData);
   };
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded-md">
+    <form
+      onSubmit={handleSubmit}
+      className="p-4 border rounded-md flex items-center flex-col"
+    >
       {fields.map(
         (field, index) =>
           field.visible &&
@@ -79,7 +82,7 @@ export const Form: React.FC<FormProps> = ({
       )}
       <button
         type="submit"
-        className="mt-4 bg-orange-800 text-white py-2 px-4 rounded"
+        className="mt-4 bg-indigo-700 hover:bg-indigo-500 text-white py-2 px-4 rounded"
       >
         Submit
       </button>

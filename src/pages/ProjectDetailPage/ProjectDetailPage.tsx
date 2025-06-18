@@ -94,7 +94,7 @@ export const ProjectDetailPage = () => {
       name: "projectManager",
       label: "Project Manager",
       type: "picker",
-      visible: userRole === "ADMIN",
+      visible: userRole === "ADMIN" || userRole === "GUEST",
       isSingleSelect: true,
       options: users.filter((user) => user.role === "PROJECT_MANAGER"),
     },
@@ -129,11 +129,12 @@ export const ProjectDetailPage = () => {
       ...formData,
       id: id,
     };
-
     try {
       const updatedProject = await updateProject(fullData, navigate);
+
       if (updatedProject) {
         setIsUpdateModalOpen(false);
+        setProject(updatedProject);
         toast.success("Project updated successfully!");
       }
     } catch (error) {
@@ -189,9 +190,9 @@ export const ProjectDetailPage = () => {
   });
 
   return (
-    <div className="w-full h-full flex  flex-col">
-      <div className="flex flex-col items-start justify-start p-8">
-        <div className="flex flex-row align-middle gap-2">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex flex-col items-start justify-start md:p-8 lg:p-8">
+        <div className="flex flex-row align-middle gap-2 w-full justify-center md:justify-start">
           <div className="left-32 py-4 items-center flex">
             <TooltipHint text="Go Back To Projects">
               <button
@@ -203,81 +204,86 @@ export const ProjectDetailPage = () => {
             </TooltipHint>
           </div>
           <div className="flex flex-row">
-            <div className="rounded-lg px-8 py-4 items-center flex rounded-b-none align-middle gap-2">
+            <div className="rounded-lg md:px-8 lg:px-8 px-4 py-4 items-center flex rounded-b-none align-middle gap-2">
               <h1 className="text-[24px] font-bold font-roboto">
                 {project && project.title}
               </h1>
             </div>
 
-            {project && (isProjectManager || userRole === "ADMIN") && (
-              <div className="flex items-start py-8 gap-4">
-                <TooltipHint text="Update Project">
-                  <button onClick={() => setIsUpdateModalOpen(true)}>
-                    <SquarePen size={24} />
-                  </button>
-                </TooltipHint>
-                <TooltipHint text="Delete Project">
-                  <button onClick={() => setIsDeleteModalOpen(true)}>
-                    <Trash2></Trash2>
-                  </button>
-                </TooltipHint>
-              </div>
-            )}
+            {project &&
+              (isProjectManager ||
+                userRole === "ADMIN" ||
+                userRole === "GUEST") && (
+                <div className="flex items-start py-8 gap-4">
+                  <TooltipHint text="Update Project">
+                    <button onClick={() => setIsUpdateModalOpen(true)}>
+                      <SquarePen size={24} />
+                    </button>
+                  </TooltipHint>
+                  <TooltipHint text="Delete Project">
+                    <button onClick={() => setIsDeleteModalOpen(true)}>
+                      <Trash2></Trash2>
+                    </button>
+                  </TooltipHint>
+                </div>
+              )}
           </div>
         </div>
 
-        <div className="flex flex-row w-full gap-[160px] align-middle">
-          <div className="flex flex-col items-start align-middle px-8 py-4 gap-6">
-            <h2 className="text-lg font-roboto">Department</h2>
+        <div className="flex flex-row w-full md:justify-between justify-center align-middle flex-wrap">
+          <div className="flex md:flex-col flex-row items-center md:items-start align-middle px-8 py-4 gap-6">
+            <span className="text-md text-gray-500 font-roboto">
+              Department:
+            </span>
             <span className="font-roboto font-bold">
-              {project && project.departmentName}
+              {project?.departmentName}
             </span>
           </div>
 
-          <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
-            <h2 className="text-lg font-roboto">Status</h2>
-            <div
-              className={`font-roboto font-bold p-2 rounded-md ${
+          <div className="flex flex-row md:flex-col lg:flex-col items-center md:items-start align-middle px-8 py-2 justify-center gap-3">
+            <span className="text-md text-gray-500 font-roboto">Status:</span>
+            <span
+              className={`font-roboto font-bold p-2 rounded-md w-fit ${
                 projectStatusColors[project?.status] || ""
               }`}
             >
-              {project && project.status}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start align-middle px-8 py-4 gap-6">
-            <h2 className="text-lg font-roboto">Project Manager</h2>
-            <span className="font-roboto font-bold">
-              {project && project.projectManager.name}
+              {project?.status}
             </span>
           </div>
 
-          <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
-            <h2 className="text-lg font-roboto">Team Members</h2>
+          <div className="flex flex-row md:flex-col lg:flex-col items-center md:items-start align-middle justify-center px-8 py-2 gap-4">
+            <span className="text-md text-gray-500 font-roboto">
+              Project Manager:
+            </span>
+            <span className="font-roboto font-bold">
+              {project?.projectManager?.name}
+            </span>
+          </div>
+
+          <div className="flex flex-row md:flex-col lg:flex-col items-center md:items-start align-middle px-8 py-2 justify-center gap-3">
+            <span className="text-md text-gray-500 font-roboto">
+              Team Members:
+            </span>
             <AvatarGroup max={4}>
-              {teamMembers &&
-                teamMembers.map((member, index) => (
-                  <TooltipHint key={index} text={member.name}>
-                    <Avatar
-                      alt={member.name}
-                      src="/static/images/avatar/1.jpg"
-                    />
-                  </TooltipHint>
-                ))}
+              {teamMembers?.map((member, index) => (
+                <TooltipHint key={index} text={member.name}>
+                  <Avatar alt={member.name} src="/static/images/avatar/1.jpg" />
+                </TooltipHint>
+              ))}
             </AvatarGroup>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-start p-8">
+      <div className="flex md:justify-start lg:justify-start border-[1px] justify-center p-6 flex-wrap m-6 md:m-0">
         <h2 className="text-xl mb-4 font-roboto">
           {project && project.description}
         </h2>
       </div>
       <Divider></Divider>
-      <div className="flex flex-row justify-between items-center p-8">
-        <h1 className="text-[24px] font-bold px-8 font-roboto">Tasks</h1>
-        <div className="flex flex-row gap-4">
+      <div className="flex flex-row justify-between items-center p-8 flex-wrap w-full gap-4">
+        <h1 className="text-[24px] font-bold md:px-8 font-roboto">Tasks</h1>
+        <div className="flex flex-row gap-4 flex-wrap">
           <Input
             label="Search by title"
             type="text"

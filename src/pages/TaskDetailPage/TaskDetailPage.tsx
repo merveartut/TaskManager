@@ -55,7 +55,10 @@ export const TaskDetailPage = () => {
   );
   const isProjectManager = task?.project?.projectManager.id === userId;
   const canUpdateTodoState =
-    isProjectManager || userRole === "ADMIN" || task?.assignee.id === userId;
+    isProjectManager ||
+    userRole === "ADMIN" ||
+    userRole === "GUEST" ||
+    task?.assignee.id === userId;
   const modalFields: any = [
     { name: "title", label: "Title", type: "text", visible: true },
     { name: "description", label: "Description", type: "text", visible: true },
@@ -137,7 +140,7 @@ export const TaskDetailPage = () => {
     const fullData = {
       text: commentText,
       task: { id },
-      commenter: { id: userId },
+      commenter: { id: userId, role: userRole },
     };
 
     try {
@@ -183,7 +186,6 @@ export const TaskDetailPage = () => {
   };
 
   const submitReasonAndUpdateState = async () => {
-    console.log("orrrrrrrrr this one");
     if (!pendingState || !task || !reasonText.trim()) return;
 
     try {
@@ -214,92 +216,106 @@ export const TaskDetailPage = () => {
     <div className="w-full h-full flex flex-wrap lg:flex-nowrap">
       {task && (
         <div className="w-full lg:w-1/2 p-6 flex flex-col gap-4">
-          <div className="flex flex-row items-start">
+          <div className="flex flex-row align-middle gap-2 w-full justify-center md:justify-start">
             <div className="left-32 py-4">
-              <button
-                onClick={() => navigate(-1)} // update route if needed
-                className="text-blue-600 hover:text-blue-800 font-semibold underline"
-              >
-                <CircleArrowLeft />
-              </button>
+              <TooltipHint text="Go Back To Tasks">
+                <button
+                  onClick={() => navigate(-1)} // update route if needed
+                  className="text-blue-600 hover:text-blue-800 font-semibold underline"
+                >
+                  <CircleArrowLeft />
+                </button>
+              </TooltipHint>
             </div>
-            <div className="flex flex-col rounded-lg w-full">
-              <div className="flex flex-row">
-                <div className="rounded-lg px-8 items-center flex rounded-b-none align-middle gap-2">
-                  <h1 className="text-[24px] font-bold font-roboto">
-                    {task.title}
-                  </h1>
-                </div>
-                {(userRole === "ADMIN" || isProjectManager) && (
-                  <div className="flex items-start p-4 gap-6">
-                    <TooltipHint text="Update Task">
-                      <button onClick={() => setIsModalOpen(true)}>
-                        <SquarePen size={24} />
-                      </button>
-                    </TooltipHint>
-                    <TooltipHint text="Delete Task">
-                      <button onClick={() => setIsDeleteModalOpen(true)}>
-                        <Trash2></Trash2>
-                      </button>
-                    </TooltipHint>
-                  </div>
-                )}
+            <div className="flex flex-row">
+              <div className="rounded-lg md:px-8 lg:px-8 px-4 py-4 items-center flex rounded-b-none align-middle gap-2">
+                <h1 className="text-[24px] font-bold font-roboto">
+                  {task.title}
+                </h1>
               </div>
-
-              <div className="flex flex-row w-full justify-between align-middle">
-                <div className="flex flex-col items-start align-middle px-8 py-4 gap-6">
-                  <h2 className="text-lg font-roboto">Assignee</h2>
-                  <span className="font-roboto font-bold">
-                    {task.assignee.name}
-                  </span>
+              {(userRole === "ADMIN" ||
+                isProjectManager ||
+                userRole === "GUEST") && (
+                <div className="flex items-start p-4 gap-6">
+                  <TooltipHint text="Update Task">
+                    <button onClick={() => setIsModalOpen(true)}>
+                      <SquarePen size={24} />
+                    </button>
+                  </TooltipHint>
+                  <TooltipHint text="Delete Task">
+                    <button onClick={() => setIsDeleteModalOpen(true)}>
+                      <Trash2></Trash2>
+                    </button>
+                  </TooltipHint>
                 </div>
-                <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
-                  <h2 className="text-lg font-roboto">State</h2>
-                  <Dropdown
-                    label="State"
-                    customButtonClass={`font-roboto font-bold p-2 rounded-md ${
-                      stateColors[task.state] || ""
-                    }`}
-                    selectedOption={task.state}
-                    disabled={!canUpdateTodoState}
-                    onSelect={handleStateChange}
-                    options={[
-                      "BACKLOG",
-                      "IN_ANALYSIS",
-                      "IN_DEVELOPMENT",
-                      "CANCELLED",
-                      "BLOCKED",
-                      "COMPLETED",
-                    ]}
-                  ></Dropdown>
-                </div>
-                <div className="flex flex-col items-start align-middle px-8 py-4 gap-4">
-                  <h2 className="text-lg font-roboto">Priority</h2>
-                  <div
-                    className={`font-roboto font-bold p-2 rounded-md ${
-                      taskPriorityColors[task.priority] || ""
-                    }`}
-                  >
-                    {task.priority}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-start p-8">
-                <h2 className="text-lg mb-4 font-roboto">{task.description}</h2>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-row w-full justify-between align-middle flex-wrap">
+            <div className="flex md:flex-col flex-row items-center md:items-start align-middle px-8 py-4 gap-6">
+              <h2 className="text-lg font-roboto">Assignee:</h2>
+              <span className="font-roboto font-bold">
+                {task.assignee.name}
+              </span>
+            </div>
+            <div className="flex md:flex-col flex-row items-center md:items-start align-middle px-8 py-4 gap-4">
+              <h2 className="text-lg font-roboto">State:</h2>
+              <Dropdown
+                label="State"
+                customButtonClass={`font-roboto font-bold p-2 rounded-md ${
+                  stateColors[task.state] || ""
+                }`}
+                selectedOption={task.state}
+                disabled={!canUpdateTodoState}
+                onSelect={handleStateChange}
+                options={[
+                  "BACKLOG",
+                  "IN_ANALYSIS",
+                  "IN_DEVELOPMENT",
+                  "CANCELLED",
+                  "BLOCKED",
+                  "COMPLETED",
+                ]}
+              ></Dropdown>
+            </div>
+            <div className="flex md:flex-col flex-row items-center md:items-start align-middle px-8 py-4 gap-4">
+              <h2 className="text-lg font-roboto">Priority:</h2>
+              <div
+                className={`font-roboto font-bold p-2 rounded-md ${
+                  taskPriorityColors[task.priority] || ""
+                }`}
+              >
+                {task.priority}
               </div>
             </div>
           </div>
 
+          <div className="flex md:justify-start lg:justify-start border-[1px] justify-center p-6 flex-wrap m-6 md:m-0">
+            <h2 className="text-lg mb-4 font-roboto">{task.description}</h2>
+          </div>
           <AccordionCard
             header="Attachments"
             defaultExpanded={processedFiles && processedFiles.length}
             content={
               <div className="flex flex-row p-4">
                 <ul className="p-4 flex gap-2 flex-wrap overflow-auto">
-                  <div className="w-fit bg-gray-200 flex items-center justify-center mb-2 p-4 rounded">
-                    <FileUploader taskId={id} userId={userId} label=" " />
-                  </div>
+                  <TooltipHint text="Add new file">
+                    <div
+                      className={`w-fit flex items-center justify-center rounded mb-2 ${
+                        userRole === "GUEST"
+                          ? "bg-stone-600"
+                          : "bg-blue-900 hover:bg-blue-600"
+                      }`}
+                    >
+                      <FileUploader
+                        taskId={id}
+                        userId={userId}
+                        label=" "
+                        disabled={userRole === "GUEST"}
+                      />
+                    </div>
+                  </TooltipHint>
+
                   {processedFiles &&
                     processedFiles.map((file: any) => (
                       <li
@@ -380,19 +396,19 @@ export const TaskDetailPage = () => {
                     <Editor
                       value={commentText}
                       onTextChange={(e: any) => setCommentText(e.htmlValue)}
-                      className="h-full w-full"
+                      className="w-full"
                     />
                   </div>
 
-                  <div className="flex flex-row w-full justify-end mt-8">
+                  <div className="flex flex-row w-full justify-end mt-2">
                     <button
                       type="submit"
-                      className={`mt-4 ${
-                        !commentText || commentText.length === 0
-                          ? "bg-zinc-300"
-                          : "bg-blue-700"
-                      } text-white py-1 px-4 rounded font-roboto`}
-                      disabled={!commentText || commentText.length === 0}
+                      className={`mt-4 disabled:bg-zinc-300 bg-blue-700  text-white py-1 px-4 rounded font-roboto`}
+                      disabled={
+                        !commentText ||
+                        commentText.length === 0 ||
+                        userRole === "GUEST"
+                      }
                       onClick={handleSendComment}
                     >
                       Send

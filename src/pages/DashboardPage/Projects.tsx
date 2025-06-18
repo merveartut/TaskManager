@@ -24,7 +24,9 @@ export const Projects: React.FC = () => {
   const [searchByTitle, setSearchByTitle] = useState("");
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
-  const currentUserRole = localStorage.getItem("userRole");
+  const userAdminOrGuest =
+    localStorage.getItem("userRole") === "ADMIN" ||
+    localStorage.getItem("userRole") === "GUEST";
   const navigate = useNavigate();
 
   const modalFields = [
@@ -64,7 +66,9 @@ export const Projects: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
+    const isGuest = localStorage.getItem("guest") === "true";
+    if (!token && !isGuest) {
+      alert("You should have a token or you should be GUEST!");
       navigate("/login");
       return;
     }
@@ -130,7 +134,6 @@ export const Projects: React.FC = () => {
         },
         body: JSON.stringify(formData),
       });
-
       if (!response.ok) {
         throw new Error("Failed to create project");
       }
@@ -153,10 +156,10 @@ export const Projects: React.FC = () => {
     );
   });
   return (
-    <div className="w-full h-full flex  flex-col">
-      <div className="flex flex-row justify-between items-center p-8">
-        <h1 className="text-[24px] font-bold px-8 font-roboto">Projects</h1>
-        <div className="flex flex-row gap-4">
+    <div className="w-full h-screen flex flex-col">
+      <div className="flex flex-row justify-between items-center p-8 gap-6 flex-wrap w-full">
+        <h1 className="text-[24px] font-bold md:px-8 font-roboto">Projects</h1>
+        <div className="flex flex-row gap-4 flex-wrap">
           <Input
             label="Search by title"
             type="text"
@@ -179,7 +182,7 @@ export const Projects: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        {currentUserRole === "ADMIN" && (
+        {userAdminOrGuest && (
           <div
             onClick={() => setIsModalOpen(true)}
             className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"

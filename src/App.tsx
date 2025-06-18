@@ -45,7 +45,7 @@ function AppContent() {
       name: "User Settings",
       path: "/settings",
       icon: <Settings size={20} />,
-      display: currentUserRole === "ADMIN",
+      display: currentUserRole === "ADMIN" || currentUserRole === "GUEST",
     },
   ];
 
@@ -54,6 +54,7 @@ function AppContent() {
     userName: userName,
     userId: userId,
     name: "Profile",
+    userRole: currentUserRole,
   };
 
   return (
@@ -71,17 +72,19 @@ function AppContent() {
           },
         }}
       />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/profile/:id" element={<ProfilePage />} />
-        <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
-        <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="*" element={<Navigate to="/login" />} />{" "}
-        {/* Redirect unknown routes to login */}
-      </Routes>
+      <div className="flex-1 overflow-y-auto md:pt-0 lg:pt-0 pt-16">
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
+          <Route path="/projectDetail/:id" element={<ProjectDetailPage />} />
+          <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="*" element={<Navigate to="/login" />} />{" "}
+          {/* Redirect unknown routes to login */}
+        </Routes>
+      </div>
     </div>
   );
 }

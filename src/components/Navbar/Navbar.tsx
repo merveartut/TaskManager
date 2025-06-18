@@ -1,9 +1,10 @@
-import { LogOut, Menu } from "lucide-react";
-import React, { useState } from "react";
+import { BrushCleaning, CircleAlert, LogOut, Menu } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TooltipHint } from "../Tooltip/TooltipHint";
-import { Avatar } from "@mui/material";
+import { Avatar, Drawer, IconButton } from "@mui/material";
 import { Modal } from "../Modal/Modal";
+import mopLogo from "../../assets/mop.png";
 
 interface NavbarProps {
   items: any[];
@@ -14,33 +15,69 @@ export const Navbar: React.FC<NavbarProps> = ({ items, userInfo }) => {
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(false);
 
+  // Detect mobile viewport width < 640px
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // When mobile and collapsed, only render floating menu button
+
+  // Helper to get user initials
   const getInitials = (name: string) => {
-    console.log("is this one", name);
-    if (!name) {
-      return null;
-    }
+    if (!name) return null;
     const parts = name.trim().split(" ");
     const first = parts[0]?.[0] || "";
     const second = parts[1]?.[0] || "";
     return (first + second).toLowerCase();
   };
-  return (
+
+  // Sidebar content (used inside Drawer or desktop sidebar)
+  // The sidebarContent here expects expanded boolean to decide if names are shown.
+  const sidebarContent = (showText: boolean) => (
     <div
-      className={`h-screen bg-gray-900 text-white flex flex-col items-center p-4 transition-all duration-300 ${
-        expanded ? "w-60" : "w-16"
+      className={`min-h-screen bg-gray-900 text-white flex flex-col p-4 ${
+        showText ? "w-60" : "w-16"
       }`}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
     >
-      <div className="flex items-center w-full justify-between mb-6">
-        {expanded && <h2 className="text-xl font-bold">MOP</h2>}
-        <Menu size={24} className="cursor-pointer" />
+      <div
+        className={`flex items-center mb-6 ${
+          showText ? "justify-between" : "justify-center"
+        } w-full`}
+      >
+        {showText ? (
+          <>
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                navigate("/projects");
+                if (isMobile) setMobileOpen(false);
+              }}
+            >
+              <img src={mopLogo} width={32} />
+              <h2 className="text-xl font-bold font-roboto">MOP</h2>
+            </div>
+          </>
+        ) : (
+          <img
+            src={mopLogo}
+            width={32}
+            className="cursor-pointer"
+            onClick={() => {
+              navigate("/projects");
+              if (isMobile) setMobileOpen(false);
+            }}
+          />
+        )}
       </div>
 
-      {/* Main nav items */}
-      <nav className="flex flex-col space-y-4 w-full flex-1">
+      <nav className="flex flex-col space-y-4 flex-1">
         {items.map(
           (item) =>
             item.display && (
@@ -52,55 +89,136 @@ export const Navbar: React.FC<NavbarProps> = ({ items, userInfo }) => {
                     ? "bg-blue-600"
                     : "hover:bg-gray-700"
                 }`}
+                onClick={() => isMobile && setMobileOpen(false)}
               >
-                {item.icon}
-                {expanded && <span className="ml-3">{item.name}</span>}
+                <div>{item.icon}</div>
+                {showText && <span className="ml-3">{item.name}</span>}
               </Link>
             )
         )}
       </nav>
 
-      {/* User info link pinned to bottom */}
       {userInfo && (
-        <div
-          className={`flex flex-col gap-4 w-full mt-auto ${
-            expanded ? "" : "flex justify-center"
-          }`}
-        >
-          <TooltipHint text={userInfo.userName}>
-            <div
-              className={`w-full mt-auto ${
-                expanded ? "" : "flex justify-center"
-              }`}
-            >
+        <div className="flex flex-col gap-4 w-full mt-auto">
+          {userInfo.userRole !== "GUEST" && (
+            <TooltipHint text={userInfo.userName}>
               <Link
                 to={userInfo.path}
                 className={`flex items-center py-2 rounded-lg transition ${
                   location.pathname === userInfo.path
                     ? "bg-blue-600"
                     : "hover:bg-gray-700"
-                } ${expanded ? "w-full" : ""}`}
+                }`}
+                onClick={() => isMobile && setMobileOpen(false)}
               >
                 <Avatar alt={userInfo.userName}>
                   {getInitials(userInfo.userName)}
                 </Avatar>
-                {expanded && <span className="ml-3">{userInfo.name}</span>}
+                {showText && <span className="ml-3">{userInfo.name}</span>}
               </Link>
-            </div>
-          </TooltipHint>
+            </TooltipHint>
+          )}
           <TooltipHint text="Logout">
             <button
-              className={`flex items-center p-2 rounded-lg transition`}
-              onClick={() => setIsModalOpen(true)}
+              className="flex items-center p-2 rounded-lg transition"
+              onClick={() => {
+                setIsModalOpen(true);
+                setMobileOpen(false);
+              }}
             >
               <LogOut />
-              {expanded && <span className="ml-3">Logout</span>}
+              {showText && <span className="ml-3">Logout</span>}
             </button>
           </TooltipHint>
         </div>
       )}
+    </div>
+  );
+
+  // Mobile: when screen <640px, render a floating button or drawer
+  if (isMobile) {
+    return (
+      <>
+        {/* Fixed top navbar for mobile */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white flex items-center justify-between px-4 py-3 shadow-md">
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate("/projects")}
+          >
+            <img src={mopLogo} width={28} />
+            <h2 className="text-lg font-bold font-roboto">MOP</h2>
+          </div>
+          <IconButton
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+            className="!text-white"
+          >
+            <Menu />
+          </IconButton>
+        </div>
+
+        {/* Drawer slides from left */}
+        <Drawer
+          anchor="right"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+        >
+          {sidebarContent(true)}
+        </Drawer>
+
+        {/* Logout Confirmation Modal */}
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <div className="flex flex-row items-center gap-2 justify-center">
+            <CircleAlert size={32} color="blue" />
+            <span className="text-black">
+              Are you sure you want to log out?
+            </span>
+          </div>
+
+          <div className="flex flex-row justify-end gap-6">
+            <button
+              type="button"
+              className="mt-4 bg-slate-500 text-white py-2 px-4 rounded"
+              onClick={() => setIsModalOpen(false)}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
+              onClick={() => {
+                setIsModalOpen(false);
+                navigate("/");
+              }}
+            >
+              Yes
+            </button>
+          </div>
+        </Modal>
+      </>
+    );
+  }
+
+  // Desktop sidebar with hover expand/collapse
+  return (
+    <>
+      <div
+        className={`min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 transition-all duration-300 ${
+          expanded ? "w-60" : "w-16"
+        }`}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+      >
+        {sidebarContent(expanded)}
+      </div>
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <span className="text-black">Are you sure you want to log out ?</span>
+        <div className="flex flex-row items-center gap-2 justify-center">
+          <CircleAlert size={32} color="blue" />
+          <span className="text-black">Are you sure you want to log out ?</span>
+        </div>
+
         <div className="flex flex-row justify-end gap-6">
           <button
             type="submit"
@@ -112,12 +230,15 @@ export const Navbar: React.FC<NavbarProps> = ({ items, userInfo }) => {
           <button
             type="submit"
             className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              setIsModalOpen(false);
+              navigate("/");
+            }}
           >
             Yes
           </button>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };

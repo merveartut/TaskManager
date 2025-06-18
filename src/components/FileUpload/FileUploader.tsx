@@ -5,6 +5,7 @@ interface FileProps {
   taskId?: any;
   userId?: any;
   label?: string;
+  disabled?: boolean;
   onUploadComplete?: () => void;
 }
 
@@ -13,6 +14,7 @@ export const FileUploader: React.FC<FileProps> = ({
   taskId,
   userId,
   label = "Upload",
+  disabled = false,
   onUploadComplete,
 }) => {
   const handleUpload = async (event: any) => {
@@ -45,7 +47,10 @@ export const FileUploader: React.FC<FileProps> = ({
       name="file"
       customUpload
       uploadHandler={handleUpload}
+      mode="basic"
       auto
+      disabled={disabled}
+      className={`!p-0 text-white rounded cursor-pointer`}
       chooseLabel={label}
     />
   );

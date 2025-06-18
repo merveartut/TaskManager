@@ -26,7 +26,7 @@ export const Tasks = () => {
   const userRole = localStorage.getItem("userRole");
 
   const filteredProjects = projects.filter((project: any) => {
-    if (userRole === "ADMIN") {
+    if (userRole === "ADMIN" || userRole === "GUEST") {
       return project;
     }
     if (userRole === "PROJECT_MANAGER") {
@@ -97,7 +97,6 @@ export const Tasks = () => {
       alert("Error creating task");
     }
   };
-  console.log("asdhA<VDHGVSF", selectedUser);
 
   const filteredTasks = tasks.filter((task: any) => {
     return (
@@ -116,9 +115,9 @@ export const Tasks = () => {
 
   return (
     <div className="w-full h-full flex  flex-col">
-      <div className="flex flex-row justify-between items-center p-8">
-        <h1 className="text-2xl font-bold mb-4">Tasks</h1>
-        <div className="flex flex-row gap-4">
+      <div className="flex flex-row justify-between items-center p-8 flex-wrap gap-6">
+        <h1 className="text-[24px] font-bold px-8 font-roboto">Tasks</h1>
+        <div className="flex flex-row gap-4 flex-wrap">
           <Input
             label="Search by title"
             type="text"
@@ -160,7 +159,9 @@ export const Tasks = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER") && (
+        {(userRole === "ADMIN" ||
+          userRole === "PROJECT_MANAGER" ||
+          userRole === "GUEST") && (
           <div
             onClick={() => setIsModalOpen(true)}
             className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"

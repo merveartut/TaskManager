@@ -51,6 +51,8 @@ export const SettingsPage = () => {
       if (newUser) {
         setIsModalOpen(false);
         toast.success("User added successfully!");
+        const updatedUsers = await fetchUsers(navigate);
+        setUsers(updatedUsers);
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -74,10 +76,10 @@ export const SettingsPage = () => {
     }
   };
   return (
-    <div className="flex flex-col gap-6 p-8 justify-center items-center">
-      <div className="w-[1200px] overflow-y-auto">
-        <div className="grid grid-cols-4 gap-12 font-semibold bg-gray-100 p-4 rounded-t-lg">
-          <div>ID</div>
+    <div className="flex flex-col gap-6 p-8 justify-start items-center w-full mt-20">
+      <div className=" overflow-y-auto">
+        <div className="grid  md:grid-cols-4 gap-12 lg:grid-cols-4 grid-cols-3 font-semibold bg-gray-100 p-4 rounded-t-lg">
+          <div className="md:block lg:block hidden">ID</div>
           <div>Name</div>
           <div>Role</div>
         </div>
@@ -85,24 +87,27 @@ export const SettingsPage = () => {
           onClick={() => setIsModalOpen(true)}
           className="flex flex-row gap-6 items-center bg-white p-4 border-t border-gray-200 hover:shadow transition-shadow cursor-pointer"
         >
-          <CirclePlus className="text-green-700" />
-          <span className="font-semibold text-green-700"> Add New User</span>
+          <CirclePlus className="text-green-700 md:w-[24px] lg:w-[24px] w-[18px]" />
+          <span className="font-semibold text-green-700 md:text-md lg:text-md text-sm">
+            {" "}
+            Add New User
+          </span>
         </div>
         {users.map((user: any) => (
           <div
             key={user.id}
-            className="grid grid-cols-4 gap-12 items-center bg-white p-4 border-t border-gray-200 hover:shadow transition-shadow cursor-pointer"
+            className="grid md:grid-cols-4 gap-12 lg:grid-cols-4 grid-cols-3 items-center bg-white p-4 border-t border-gray-200 hover:shadow-2xl transition-shadow cursor-pointer"
           >
-            <div className="truncate">{user.id}</div>
-            <div>{user.name}</div>
-            <div>{user.role}</div>
+            <div className="truncate md:block lg:block hidden">{user.id}</div>
+            <div className="md:text-md lg:text-md text-sm">{user.name}</div>
+            <div className="md:text-md lg:text-md text-sm">{user.role}</div>
             <div>
               <TooltipHint text="Delete User">
                 <button
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:text-indigo-700 "
                 >
-                  <Delete />
+                  <Delete className="md:w-[24px] lg:w-[24px] w-[18px]" />
                 </button>
               </TooltipHint>
             </div>

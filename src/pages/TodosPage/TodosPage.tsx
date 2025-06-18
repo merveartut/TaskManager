@@ -8,6 +8,7 @@ import {
   updateTodoState,
 } from "../../services/projectApi";
 import { useNavigate } from "react-router-dom";
+import { TooltipHint } from "../../components/Tooltip/TooltipHint";
 
 interface TodosProps {
   taskId: string;
@@ -86,12 +87,14 @@ export const TodosPage: React.FC<TodosProps> = ({
           <h1 className="text-lg font-bold  font-roboto">Todos</h1>
         </div>
         {hasAuth && (
-          <button
-            className="p-2 text-blue-600 hover:text-blue-800"
-            onClick={() => setIsTodoModalOpen(true)}
-          >
-            <CirclePlus size={32} />
-          </button>
+          <TooltipHint text="Add new todo item">
+            <button
+              className="p-2 text-blue-600 hover:text-blue-800"
+              onClick={() => setIsTodoModalOpen(true)}
+            >
+              <CirclePlus size={32} />
+            </button>
+          </TooltipHint>
         )}
       </div>
 

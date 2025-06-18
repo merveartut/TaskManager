@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 interface SelectProps {
@@ -91,7 +91,7 @@ export const Select: React.FC<SelectProps> = ({
     return JSON.stringify(opt);
   };
   return (
-    <div className={`relative ${customClass}`} ref={dropdownRef}>
+    <div className={`relative ${customClass} w-full`} ref={dropdownRef}>
       {displayLabel && (
         <label className="flex items-start text-sm font-medium text-gray-700">
           {label}
@@ -100,33 +100,34 @@ export const Select: React.FC<SelectProps> = ({
 
       {/* Input Field (Searchable) */}
       <div
-        className={`border border-gray-300 rounded-md shadow-sm p-2 flex flex-wrap flex-row items-center justify-between cursor-pointer h-[55px]`}
+        className={`border border-gray-300 rounded-md shadow-sm p-2 flex flex-wrap flex-row items-center justify-between cursor-pointer w-full h-[55px]`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex flex-wrap gap-2 items-center overflow-y-auto max-h-[100px]">
           {isSingleSelect ? (
-            <div>
-              {" "}
+            <div className="flex items-center justify-between gap-2">
               {selectedValues ? (
-                <span>{getOptionLabel(selectedValues)}</span>
+                <span className="truncate">
+                  {getOptionLabel(selectedValues)}
+                </span>
               ) : (
                 <span className="text-gray-400">{label}</span>
               )}
-              {displayClearButtonForSingleSelect && (
-                <span
-                  className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm"
+              {displayClearButtonForSingleSelect && selectedValues && (
+                <button
                   onClick={clearSelected}
+                  className="bg-indigo-500 text-white px-2 py-1 rounded-md text-sm ml-2 flex items-center"
                 >
-                  ✖
-                </span>
+                  <X size={18} />
+                </button>
               )}
             </div>
-          ) : selectedValues?.length ? (
+          ) : selectedValues?.length > 0 ? (
             <>
               {selectedValues.slice(0, 3).map((value: any, index: number) => (
                 <span
                   key={index}
-                  className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm"
+                  className="bg-indigo-500 text-white px-2 py-1 rounded-md text-sm"
                   onClick={(e) => removeSelected(e, value)}
                 >
                   {getOptionLabel(value)} ✖
