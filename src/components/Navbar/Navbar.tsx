@@ -1,4 +1,4 @@
-import { BrushCleaning, CircleAlert, LogOut, Menu } from "lucide-react";
+import { CircleAlert, LogOut, Menu } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TooltipHint } from "../Tooltip/TooltipHint";
