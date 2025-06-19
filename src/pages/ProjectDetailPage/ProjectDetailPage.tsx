@@ -314,17 +314,20 @@ export const ProjectDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        {project && (isProjectManager || userRole === "ADMIN") && (
-          <div
-            onClick={() => setIsModalOpen(true)}
-            className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-          >
-            <h2 className="text-xl font-roboto font-semibold mb-6">
-              Create new Task
-            </h2>
-            <CirclePlus size={36} />
-          </div>
-        )}
+        {project &&
+          (isProjectManager ||
+            userRole === "ADMIN" ||
+            userRole === "GUEST") && (
+            <div
+              onClick={() => setIsModalOpen(true)}
+              className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            >
+              <h2 className="text-xl font-roboto font-semibold mb-6">
+                Create new Task
+              </h2>
+              <CirclePlus size={36} />
+            </div>
+          )}
         {filteredTasks.map((task: any) => (
           <div
             key={task.id}
