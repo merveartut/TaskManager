@@ -12,6 +12,7 @@ import { Select } from "../../components/Select/Select";
 import { CirclePlus } from "lucide-react";
 import { Modal } from "../../components/Modal/Modal";
 import { Form } from "../../components/Form/Form";
+import { Divider } from "@mui/material";
 
 export const Tasks = () => {
   const navigate = useNavigate();
@@ -157,6 +158,8 @@ export const Tasks = () => {
           ></Select>
         </div>
       </div>
+
+      <Divider />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
         {(userRole === "ADMIN" ||

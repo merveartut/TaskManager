@@ -116,6 +116,7 @@ export const TaskDetailPage = () => {
       if (updatedTask) {
         setTask(updatedTask);
         setIsModalOpen(false);
+        toast.success("Task updated successfully!");
       }
     } catch (error) {
       console.error("Error updating task:", error);
@@ -128,11 +129,11 @@ export const TaskDetailPage = () => {
       // @ts-ignore
       await deleteTask(id, navigate);
       setIsDeleteModalOpen(false);
-      toast.success("Project deleted successfully!");
+      toast.success("Task deleted successfully!");
       navigate(-1);
     } catch (error) {
-      console.error("Error deleting project:", error);
-      alert("Error deleting project");
+      console.error("Error deleting task:", error);
+      alert("Error deleting task");
       setIsDeleteModalOpen(false);
     }
   };
@@ -182,6 +183,16 @@ export const TaskDetailPage = () => {
     } catch (error) {
       console.error("Error updating task state", error);
       alert("State transition failed.");
+    }
+  };
+
+  const reloadAttachments = async () => {
+    try {
+      const attachments = await fetchAttachments(id, navigate);
+      setFiles(attachments);
+    } catch (error) {
+      console.error("Error loading attachments:", error);
+      alert("Error loading attachments");
     }
   };
 
@@ -299,7 +310,13 @@ export const TaskDetailPage = () => {
             content={
               <div className="flex flex-row p-4">
                 <ul className="p-4 flex gap-2 flex-wrap overflow-auto">
-                  <TooltipHint text="Add new file">
+                  <TooltipHint
+                    text={
+                      userRole === "GUEST"
+                        ? "Guests are not able to upload file."
+                        : "Upload new file"
+                    }
+                  >
                     <div
                       className={`w-fit flex items-center justify-center rounded mb-2 ${
                         userRole === "GUEST"
@@ -312,6 +329,7 @@ export const TaskDetailPage = () => {
                         userId={userId}
                         label=" "
                         disabled={userRole === "GUEST"}
+                        onUploadComplete={reloadAttachments}
                       />
                     </div>
                   </TooltipHint>
@@ -401,18 +419,26 @@ export const TaskDetailPage = () => {
                   </div>
 
                   <div className="flex flex-row w-full justify-end mt-2">
-                    <button
-                      type="submit"
-                      className={`mt-4 disabled:bg-zinc-300 bg-blue-700  text-white py-1 px-4 rounded font-roboto`}
-                      disabled={
-                        !commentText ||
-                        commentText.length === 0 ||
+                    <TooltipHint
+                      text={
                         userRole === "GUEST"
+                          ? "Guests are not able to add comment."
+                          : "Send Message"
                       }
-                      onClick={handleSendComment}
                     >
-                      Send
-                    </button>
+                      <button
+                        type="submit"
+                        className={`mt-4 disabled:bg-zinc-300 bg-blue-700  text-white py-1 px-4 rounded font-roboto`}
+                        disabled={
+                          !commentText ||
+                          commentText.length === 0 ||
+                          userRole === "GUEST"
+                        }
+                        onClick={handleSendComment}
+                      >
+                        Send
+                      </button>
+                    </TooltipHint>
                   </div>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import { Form } from "../../components/Form/Form";
 import { projectStatusColors } from "../../constants/uiColors";
 import { Input } from "../../components/Input/Input";
 import { Select } from "../../components/Select/Select";
+import { toast } from "react-hot-toast";
+import { Divider } from "@mui/material";
 
 interface Project {
   id: string;
@@ -141,6 +143,7 @@ export const Projects: React.FC = () => {
       const newProject = await response.json();
       setProjects([...projects, newProject]); // Update project list
       setIsModalOpen(false); // Close modal
+      toast.success("Project created successfully!");
     } catch (error) {
       console.error("Error creating project:", error);
       alert("Error creating project");
@@ -180,6 +183,8 @@ export const Projects: React.FC = () => {
           ></Select>
         </div>
       </div>
+
+      <Divider />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
         {userAdminOrGuest && (

@@ -1,5 +1,6 @@
 import { FileUpload } from "primereact/fileupload";
 import React from "react";
+import toast from "react-hot-toast";
 
 interface FileProps {
   taskId?: any;
@@ -32,7 +33,7 @@ export const FileUploader: React.FC<FileProps> = ({
       });
 
       if (response.ok) {
-        alert("File uploaded!");
+        toast.success("File uploaded successfully!");
         onUploadComplete?.();
       } else {
         alert("Failed to upload");

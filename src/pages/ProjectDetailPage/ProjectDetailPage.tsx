@@ -118,6 +118,7 @@ export const ProjectDetailPage = () => {
       if (newTask) {
         setTasks((prev) => [...prev, newTask]);
         setIsModalOpen(false);
+        toast.success("Task created successfully!");
       }
     } catch (error) {
       console.error("Error creating task:", error);
@@ -275,7 +276,7 @@ export const ProjectDetailPage = () => {
         </div>
       </div>
 
-      <div className="flex md:justify-start lg:justify-start border-[1px] justify-center p-6 flex-wrap m-6 md:m-0">
+      <div className="flex md:justify-start lg:justify-start border-[1px] justify-center p-6 flex-wrap m-6">
         <h2 className="text-xl mb-4 font-roboto">
           {project && project.description}
         </h2>
