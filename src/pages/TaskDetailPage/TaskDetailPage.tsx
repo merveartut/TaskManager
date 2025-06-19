@@ -36,7 +36,7 @@ interface Task {
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export const TaskDetailPage = () => {
-  const { id } = useParams<any>();
+  const { id } = useParams<string>();
   const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
   const navigate = useNavigate();
@@ -187,6 +187,7 @@ export const TaskDetailPage = () => {
   };
 
   const reloadAttachments = async () => {
+    if (!id) return;
     try {
       const attachments = await fetchAttachments(id, navigate);
       setFiles(attachments);
