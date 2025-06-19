@@ -9,7 +9,7 @@ const loginFields = [
   { name: "username", label: "Username", type: "username", visible: true },
   { name: "password", label: "Password", type: "password", visible: true },
 ];
-const API_BASE = "http://localhost:8080";
+const API_BASE = "https://taskmanagerbackend-cgl2.onrender.com";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
