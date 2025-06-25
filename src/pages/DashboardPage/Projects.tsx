@@ -24,6 +24,7 @@ export const Projects: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchByTitle, setSearchByTitle] = useState("");
+  const [loading, setLoading] = useState(false);
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
   const userAdminOrGuest =
@@ -77,6 +78,7 @@ export const Projects: React.FC = () => {
 
     const fetchProjects = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`${API_BASE}/api/projects/v1`, {
           method: "GET",
           headers: {
@@ -91,6 +93,7 @@ export const Projects: React.FC = () => {
         }
 
         const data = await response.json();
+        //setLoading(false);
         setProjects(data);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -100,6 +103,7 @@ export const Projects: React.FC = () => {
 
     const fetchUsers = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`${API_BASE}/api/users/v1`, {
           method: "GET",
           headers: {
@@ -114,10 +118,11 @@ export const Projects: React.FC = () => {
         }
 
         const data = await response.json();
-
+        setLoading(false);
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setLoading(false);
       }
     };
 
@@ -128,6 +133,7 @@ export const Projects: React.FC = () => {
   const handleCreateProject = async (formData: Record<string, any>) => {
     const token = localStorage.getItem("token");
     try {
+      setLoading(true);
       const response = await fetch(`${API_BASE}/api/projects/v1`, {
         method: "POST",
         headers: {
@@ -142,9 +148,11 @@ export const Projects: React.FC = () => {
 
       const newProject = await response.json();
       setProjects([...projects, newProject]); // Update project list
+      setLoading(false);
       setIsModalOpen(false); // Close modal
       toast.success("Project created successfully!");
     } catch (error) {
+      setLoading(false);
       console.error("Error creating project:", error);
       alert("Error creating project");
     }
@@ -186,37 +194,47 @@ export const Projects: React.FC = () => {
 
       <Divider />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        {userAdminOrGuest && (
-          <div
-            onClick={() => setIsModalOpen(true)}
-            className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-          >
-            <h2 className="text-xl font-semibold mb-6">Create new Project</h2>
-            <CirclePlus size={36} />
-          </div>
-        )}
+      {loading ? (
+        <div className="flex justify-center items-center flex-grow h-[60vh]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
+            {userAdminOrGuest && (
+              <div
+                onClick={() => setIsModalOpen(true)}
+                className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <h2 className="text-xl font-semibold mb-6">
+                  Create new Project
+                </h2>
+                <CirclePlus size={36} />
+              </div>
+            )}
 
-        {filteredProjects.map((project: any) => (
-          <div
-            key={project.id}
-            className="bg-white flex flex-col items-center p-4 gap-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/projectDetail/${project.id}`)}
-          >
-            <h2 className="text-xl font-semibold">{project.title}</h2>
-            <p className="text-gray-600">
-              Department: {project.departmentName}
-            </p>
-            <div
-              className={`font-roboto font-bold p-2 w-fit rounded-md ${
-                projectStatusColors[project?.status] || ""
-              }`}
-            >
-              {project && project.status}
-            </div>
+            {filteredProjects.map((project: any) => (
+              <div
+                key={project.id}
+                className="bg-white flex flex-col items-center p-4 gap-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/projectDetail/${project.id}`)}
+              >
+                <h2 className="text-xl font-semibold">{project.title}</h2>
+                <p className="text-gray-600">
+                  Department: {project.departmentName}
+                </p>
+                <div
+                  className={`font-roboto font-bold p-2 w-fit rounded-md ${
+                    projectStatusColors[project?.status] || ""
+                  }`}
+                >
+                  {project && project.status}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       {/* Modal for Creating Project */}
       <Modal
@@ -224,7 +242,11 @@ export const Projects: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title="CREATE NEW PROJECT"
       >
-        <Form fields={modalFields} onSubmit={handleCreateProject} />
+        <Form
+          fields={modalFields}
+          onSubmit={handleCreateProject}
+          loading={loading}
+        />
       </Modal>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Form } from "../../components/Form/Form";
 import image from "../../assets/task_image.jpg";
 import { useNavigate } from "react-router-dom";
@@ -9,13 +9,14 @@ const loginFields = [
   { name: "username", label: "Username", type: "username", visible: true },
   { name: "password", label: "Password", type: "password", visible: true },
 ];
-const API_BASE = "https://taskmanagerbackend-cgl2.onrender.com";
+const API_BASE = "http://localhost:8080";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  console.log("API_BASE", API_BASE);
+  const [loading, setloading] = useState(false);
   const handleSubmit = async (formData: any) => {
     try {
+      setloading(true);
       const response = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: {
@@ -32,7 +33,7 @@ export const LoginPage: React.FC = () => {
 
       const data = await response.json();
       console.log("Login successful", data);
-
+      setloading(false);
       // Save the token
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
@@ -42,11 +43,13 @@ export const LoginPage: React.FC = () => {
     } catch (error: any) {
       console.error("Login failed", error);
       alert("Login failed: " + error.message);
+      setloading(false);
     }
   };
 
   const handleExplore = async () => {
     try {
+      setloading(true);
       const res = await fetch(`${API_BASE}/auth/guest-token`, {
         method: "POST",
         headers: {
@@ -54,6 +57,7 @@ export const LoginPage: React.FC = () => {
         },
       });
       const data = await res.json();
+      setloading(false);
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
       localStorage.setItem("userRole", data.role);
@@ -63,6 +67,7 @@ export const LoginPage: React.FC = () => {
     } catch (err) {
       console.error("Failed to get guest token", err);
       alert("Unable to enter guest mode");
+      setloading(false);
     }
   };
   return (
@@ -83,13 +88,22 @@ export const LoginPage: React.FC = () => {
               <h2 className="text-2xl font-bold">Login</h2>
               <p className="text-lg italic text-gray-600">MOP up tasks!</p>
             </div>
-            <Form fields={loginFields} onSubmit={handleSubmit} />
-            <button
-              onClick={handleExplore}
-              className="text-purple-800 hover:text-purple-600 text-sm font-medium mt-4"
-            >
-              I just want to explore the app
-            </button>
+            {loading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+              </div>
+            ) : (
+              <>
+                <Form fields={loginFields} onSubmit={handleSubmit} />
+                <button
+                  onClick={handleExplore}
+                  className="text-purple-800 hover:text-purple-600 text-sm font-medium mt-4"
+                  disabled={loading}
+                >
+                  I just want to explore the app
+                </button>
+              </>
+            )}
           </div>
         </div>
 

@@ -17,12 +17,14 @@ interface FormProps {
   fields: Field[];
   onSubmit: (formData: Record<string, string | string[]>) => void;
   initialValues?: Record<string, any>;
+  loading?: boolean;
 }
 
 export const Form: React.FC<FormProps> = ({
   fields,
   onSubmit,
   initialValues = {},
+  loading = false,
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>(
     Object.fromEntries(
@@ -80,12 +82,18 @@ export const Form: React.FC<FormProps> = ({
             </div>
           ))
       )}
-      <button
-        type="submit"
-        className="mt-4 bg-indigo-700 hover:bg-indigo-500 text-white py-2 px-4 rounded"
-      >
-        Submit
-      </button>
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          className="mt-4 bg-indigo-700 hover:bg-indigo-500 text-white py-2 px-4 rounded"
+        >
+          Submit
+        </button>
+      )}
     </form>
   );
 };
