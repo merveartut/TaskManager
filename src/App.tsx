@@ -16,7 +16,7 @@ import { SettingsPage } from "./pages/SettingsPage/SettingsPage";
 import { Tasks } from "./pages/DashboardPage/Tasks";
 import { Toaster } from "react-hot-toast";
 import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 
 function App() {
   return (
@@ -59,13 +59,24 @@ function AppContent() {
   };
 
   function PrivateRoute({ children }: { children: JSX.Element }) {
-    const token = localStorage.getItem("token");
+    const [isAuthChecked, setIsAuthChecked] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    if (token || currentUserRole === "GUEST") {
-      return children;
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("userRole");
+
+      if (token || role === "GUEST") {
+        setIsAuthenticated(true);
+      }
+      setIsAuthChecked(true);
+    }, []);
+
+    if (!isAuthChecked) {
+      return <div>Loading...</div>; // or a spinner
     }
 
-    return <Navigate to="/login" />;
+    return isAuthenticated ? children : <Navigate to="/login" />;
   }
 
   return (
