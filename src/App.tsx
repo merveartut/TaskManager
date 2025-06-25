@@ -66,6 +66,9 @@ function AppContent() {
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("userRole");
 
+      console.log(token);
+      console.log(role);
+
       if (token || role === "GUEST") {
         setIsAuthenticated(true);
       }
