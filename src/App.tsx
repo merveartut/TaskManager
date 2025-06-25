@@ -81,7 +81,7 @@ function AppContent() {
           <Route path="/taskDetail/:id" element={<TaskDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/tasks" element={<Tasks />} />
-          <Route path="*" element={<Navigate to="/login" />} />{" "}
+          <Route path="/*" element={<Navigate to="/login" />} />{" "}
           {/* Redirect unknown routes to login */}
         </Routes>
       </div>
