@@ -86,6 +86,7 @@ function AppContent() {
       <div className="flex-1 overflow-y-auto md:pt-0 lg:pt-0 pt-16">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+
           <Route
             path="/projects"
             element={
@@ -134,8 +135,8 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/projects" />} />{" "}
-          {/* Default route */}
+
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>
     </div>
