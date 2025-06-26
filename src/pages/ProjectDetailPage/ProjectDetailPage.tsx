@@ -45,7 +45,10 @@ export const ProjectDetailPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchByTitle, setSearchByTitle] = useState("");
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [isUpdatingProject, setIsUpdatingProject] = useState(false);
+  const [isDeletingProject, setIsDeletingProject] = useState(false);
   const teamMembers = useSelector(
     (state: RootState) => state.teamMembers.teamMembers
   );
@@ -115,17 +118,18 @@ export const ProjectDetailPage = () => {
     };
 
     try {
-      setLoading(true);
+      setIsCreatingTask(true);
       const newTask = await createTask(fullData, navigate);
       if (newTask) {
         setTasks((prev) => [...prev, newTask]);
-        setLoading(false);
         setIsModalOpen(false);
         toast.success("Task created successfully!");
       }
     } catch (error) {
       console.error("Error creating task:", error);
       alert("Error creating task");
+    } finally {
+      setIsCreatingTask(false);
     }
   };
   const handleUpdateProject = async (formData: any) => {
@@ -134,26 +138,26 @@ export const ProjectDetailPage = () => {
       id: id,
     };
     try {
-      setLoading(true);
+      setIsUpdatingProject(true);
       const updatedProject = await updateProject(fullData, navigate);
 
       if (updatedProject) {
         setProject(updatedProject);
-        setLoading(false);
         setIsUpdateModalOpen(false);
         toast.success("Project updated successfully!");
       }
     } catch (error) {
       console.error("Error updating task:", error);
       alert("Error updating task");
+    } finally {
+      setIsUpdatingProject(false);
     }
   };
   const handleDeleteProject = async () => {
     try {
-      setLoading(true);
+      setIsDeletingProject(true);
       // @ts-ignore
       await deleteProject(id, navigate);
-      setLoading(false);
       setIsDeleteModalOpen(false);
       toast.success("Project deleted successfully!");
       navigate(-1);
@@ -161,6 +165,8 @@ export const ProjectDetailPage = () => {
       console.error("Error deleting project:", error);
       alert("Error deleting project");
       setIsDeleteModalOpen(false);
+    } finally {
+      setIsDeletingProject(false);
     }
   };
   useEffect(() => {
@@ -168,7 +174,7 @@ export const ProjectDetailPage = () => {
     localStorage.setItem("currentProjectId", id);
     const loadData = async () => {
       try {
-        setLoading(true);
+        setIsFetchingData(true);
         const [tasksData, usersData, projectData] = await Promise.all([
           fetchTasksByProjectId(id, navigate),
           fetchUsers(navigate),
@@ -178,11 +184,12 @@ export const ProjectDetailPage = () => {
         setTasks(tasksData);
         setUsers(usersData);
         setProject(projectData);
-        setLoading(false);
         dispatch(fetchTeamMembersThunk(id));
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
@@ -337,7 +344,7 @@ export const ProjectDetailPage = () => {
               <CirclePlus size={36} />
             </div>
           )}
-        {loading ? (
+        {isFetchingData ? (
           <div className="flex justify-center items-center flex-grow h-[60vh]">
             <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
           </div>
@@ -374,7 +381,7 @@ export const ProjectDetailPage = () => {
         <Form
           fields={modalFields}
           onSubmit={handleCreateTask}
-          loading={loading}
+          loading={isCreatingTask}
         />
       </Modal>
 
@@ -387,7 +394,7 @@ export const ProjectDetailPage = () => {
         <Form
           fields={updateModalFields}
           onSubmit={handleUpdateProject}
-          loading={loading}
+          loading={isUpdatingProject}
           initialValues={{
             title: project?.title,
             description: project?.description,
@@ -412,13 +419,20 @@ export const ProjectDetailPage = () => {
           >
             No
           </button>
-          <button
-            type="submit"
-            className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
-            onClick={handleDeleteProject}
-          >
-            Yes
-          </button>
+
+          {isDeletingProject ? (
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
+              onClick={handleDeleteProject}
+            >
+              Yes
+            </button>
+          )}
         </div>
       </Modal>
     </div>
