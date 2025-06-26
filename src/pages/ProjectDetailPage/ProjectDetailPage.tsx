@@ -420,19 +420,21 @@ export const ProjectDetailPage = () => {
             No
           </button>
 
-          {isDeletingProject ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
-            </div>
-          ) : (
-            <button
-              type="submit"
-              className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
-              onClick={handleDeleteProject}
-            >
-              Yes
-            </button>
-          )}
+          <div className="flex justify-center items-center h-40">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+          </div>
+
+          <button
+            type="submit"
+            className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
+            onClick={handleDeleteProject}
+          >
+            {isDeletingProject ? (
+              <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+            ) : (
+              "Yes"
+            )}
+          </button>
         </div>
       </Modal>
     </div>

@@ -92,7 +92,11 @@ export const Form: React.FC<FormProps> = ({
           disabled={loading}
           className="mt-4 bg-indigo-700 hover:bg-indigo-500 text-white py-2 px-4 rounded"
         >
-          Submit
+          {loading ? (
+            <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+          ) : (
+            "Submit"
+          )}
         </button>
       )}
     </form>

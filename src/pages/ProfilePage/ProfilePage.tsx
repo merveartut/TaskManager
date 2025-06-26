@@ -34,7 +34,10 @@ export const ProfilePage = () => {
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
 
   const modalFields = [
     {
@@ -56,7 +59,7 @@ export const ProfilePage = () => {
 
     const loadData = async () => {
       try {
-        setLoading(true);
+        setIsFetchingData(true);
         const [userData, tasksData, projectsData] = await Promise.all([
           getUserById(id, navigate),
           fetchTasksByUserId(id, navigate),
@@ -68,10 +71,11 @@ export const ProfilePage = () => {
         setProjects(projectsData);
         setEmailInput(userData.email);
         setNameInput(userData.name);
-        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
@@ -100,26 +104,28 @@ export const ProfilePage = () => {
 
   const handleChangePassword = async (formData: any) => {
     try {
-      setLoading(true);
+      setIsUpdatingPassword(true);
       await changePassword(formData);
-      setLoading(false);
       toast.success("Password updated successfully!");
       setIsPasswordModalOpen(false);
     } catch (error: any) {
       alert(error.message || "Failed to change password");
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
   const handleChangeEmail = async () => {
     if (id) {
       try {
-        setLoading(true);
+        setIsUpdatingEmail(true);
         await updateUserEmail(id, emailInput, navigate);
-        setLoading(false);
         toast.success("Email updated successfully!");
         setIsEmailModalOpen(false);
       } catch (error: any) {
         alert(error.message || "Failed to update email");
+      } finally {
+        setIsUpdatingEmail(false);
       }
     }
   };
@@ -127,12 +133,14 @@ export const ProfilePage = () => {
   const handleChangeName = async () => {
     if (id) {
       try {
+        setIsUpdatingName(true);
         await updateUserName(id, nameInput, navigate);
-        setLoading(false);
         toast.success("Name updated successfully!");
         setIsNameModalOpen(false);
       } catch (error: any) {
         alert(error.message || "Failed to update name");
+      } finally {
+        setIsUpdatingName(false);
       }
     }
   };
@@ -210,7 +218,7 @@ export const ProfilePage = () => {
           </div>
         </>
       )}
-      {loading ? (
+      {isFetchingData ? (
         <div className="flex justify-center items-center flex-grow h-[60vh]">
           <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
@@ -279,7 +287,7 @@ export const ProfilePage = () => {
           </div>
         )}
       </div>
-      {loading ? (
+      {isFetchingData ? (
         <div className="flex justify-center items-center flex-grow h-[60vh]">
           <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
@@ -319,7 +327,7 @@ export const ProfilePage = () => {
         <Form
           fields={modalFields}
           onSubmit={handleChangePassword}
-          loading={loading}
+          loading={isUpdatingPassword}
         />
       </Modal>
       <Modal
@@ -338,11 +346,15 @@ export const ProfilePage = () => {
         ></Input>
         <div className="flex flex-row justify-center gap-6">
           <button
-            className="bg-blue-600 text-white rounded px-4 py-2 mt-4 self-end"
-            disabled={loading}
+            className="bg-blue-600 text-white rounded px-4 py-2 mt-4 self-end flex items-center justify-center min-w-[100px]"
+            disabled={isUpdatingEmail}
             onClick={handleChangeEmail}
           >
-            Submit
+            {isUpdatingEmail ? (
+              <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </Modal>
@@ -362,11 +374,15 @@ export const ProfilePage = () => {
         ></Input>
         <div className="flex flex-row justify-center gap-6">
           <button
-            className="bg-blue-600 text-white rounded px-4 py-2 mt-4"
-            disabled={loading}
+            className="bg-blue-600 text-white rounded px-4 py-2 mt-4 flex items-center justify-center min-w-[100px]"
+            disabled={isUpdatingName}
             onClick={handleChangeName}
           >
-            Submit
+            {isUpdatingName ? (
+              <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </Modal>

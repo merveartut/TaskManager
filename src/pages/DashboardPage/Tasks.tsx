@@ -23,7 +23,9 @@ export const Tasks = () => {
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<string | any>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+
   const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
 
@@ -68,7 +70,7 @@ export const Tasks = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
+        setIsFetchingData(true);
         const [projectsData, tasksData, usersData] = await Promise.all([
           fetchProjects(navigate),
           fetchTasks(navigate),
@@ -78,10 +80,11 @@ export const Tasks = () => {
         setProjects(projectsData);
         setTasks(tasksData);
         setUsers(usersData);
-        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
@@ -90,17 +93,18 @@ export const Tasks = () => {
 
   const handleCreateTask = async (formData: any) => {
     try {
-      setLoading(true);
+      setIsCreatingTask(true);
       const newTask = await createTask(formData, navigate);
       if (newTask) {
         // @ts-ignore
         setTasks((prev) => [...prev, newTask]);
         setIsModalOpen(false);
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error creating task:", error);
       alert("Error creating task");
+    } finally {
+      setIsCreatingTask(false);
     }
   };
 
@@ -166,7 +170,7 @@ export const Tasks = () => {
 
       <Divider />
 
-      {loading ? (
+      {isFetchingData ? (
         <div className="flex justify-center items-center flex-grow h-[60vh]">
           <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
@@ -218,7 +222,11 @@ export const Tasks = () => {
         onClose={() => setIsModalOpen(false)}
         title="CREATE NEW TASK"
       >
-        <Form fields={modalFields} onSubmit={handleCreateTask} />
+        <Form
+          fields={modalFields}
+          onSubmit={handleCreateTask}
+          loading={isCreatingTask}
+        />
       </Modal>
     </div>
   );

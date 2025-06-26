@@ -24,7 +24,9 @@ export const Projects: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchByTitle, setSearchByTitle] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+  const [isFetchingUsers, setIsFetchingUsers] = useState(false);
+  const [isCreatingProjects, setIsCreatingProject] = useState(false);
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
   const userAdminOrGuest =
@@ -78,7 +80,7 @@ export const Projects: React.FC = () => {
 
     const fetchProjects = async () => {
       try {
-        setLoading(true);
+        setIsFetchingProjects(true);
         const response = await fetch(`${API_BASE}/api/projects/v1`, {
           method: "GET",
           headers: {
@@ -98,12 +100,14 @@ export const Projects: React.FC = () => {
       } catch (error) {
         console.error("Error fetching projects:", error);
         alert("Error loading projects");
+      } finally {
+        setIsFetchingProjects(false);
       }
     };
 
     const fetchUsers = async () => {
       try {
-        setLoading(true);
+        setIsFetchingUsers(true);
         const response = await fetch(`${API_BASE}/api/users/v1`, {
           method: "GET",
           headers: {
@@ -118,11 +122,11 @@ export const Projects: React.FC = () => {
         }
 
         const data = await response.json();
-        setLoading(false);
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
-        setLoading(false);
+      } finally {
+        setIsFetchingUsers(false);
       }
     };
 
@@ -133,7 +137,7 @@ export const Projects: React.FC = () => {
   const handleCreateProject = async (formData: Record<string, any>) => {
     const token = localStorage.getItem("token");
     try {
-      setLoading(true);
+      setIsCreatingProject(true);
       const response = await fetch(`${API_BASE}/api/projects/v1`, {
         method: "POST",
         headers: {
@@ -148,13 +152,13 @@ export const Projects: React.FC = () => {
 
       const newProject = await response.json();
       setProjects([...projects, newProject]); // Update project list
-      setLoading(false);
       setIsModalOpen(false); // Close modal
       toast.success("Project created successfully!");
     } catch (error) {
-      setLoading(false);
       console.error("Error creating project:", error);
       alert("Error creating project");
+    } finally {
+      setIsCreatingProject(false);
     }
   };
 
@@ -194,7 +198,7 @@ export const Projects: React.FC = () => {
 
       <Divider />
 
-      {loading ? (
+      {isFetchingProjects ? (
         <div className="flex justify-center items-center flex-grow h-[60vh]">
           <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
@@ -245,7 +249,7 @@ export const Projects: React.FC = () => {
         <Form
           fields={modalFields}
           onSubmit={handleCreateProject}
-          loading={loading}
+          loading={isCreatingProjects}
         />
       </Modal>
     </div>

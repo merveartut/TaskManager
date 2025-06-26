@@ -49,7 +49,12 @@ export const TaskDetailPage = () => {
   const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
   const [reasonText, setReasonText] = useState("");
   const [pendingState, setPendingState] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
+  const [isSendingComment, setIsSendingComment] = useState(false);
+  const [isUpdatingState, setIsUpdatingState] = useState(false);
+  const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const currentUser = localStorage.getItem("userId");
   const teamMembers = useSelector(
     (state: RootState) => state.teamMembers.teamMembers
@@ -86,7 +91,7 @@ export const TaskDetailPage = () => {
 
     const loadData = async () => {
       try {
-        setLoading(true);
+        setIsFetchingData(true);
         const [taskData, attachments, commentsData] = await Promise.all([
           getTaskById(id, navigate),
           fetchAttachments(id, navigate),
@@ -96,10 +101,11 @@ export const TaskDetailPage = () => {
         setTask(taskData);
         setFiles(attachments);
         setComments(commentsData);
-        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
@@ -115,26 +121,26 @@ export const TaskDetailPage = () => {
     };
 
     try {
-      setLoading(true);
+      setIsUpdatingTask(true);
       const updatedTask = await updateTask(fullData, navigate);
       if (updatedTask) {
         setTask(updatedTask);
-        setLoading(false);
         setIsModalOpen(false);
         toast.success("Task updated successfully!");
       }
     } catch (error) {
       console.error("Error updating task:", error);
       alert("Error updating task");
+    } finally {
+      setIsUpdatingTask(false);
     }
   };
 
   const handleDeleteTask = async () => {
     try {
-      setLoading(true);
+      setIsDeletingTask(true);
       // @ts-ignore
       await deleteTask(id, navigate);
-      setLoading(false);
       setIsDeleteModalOpen(false);
       toast.success("Task deleted successfully!");
       navigate(-1);
@@ -142,6 +148,8 @@ export const TaskDetailPage = () => {
       console.error("Error deleting task:", error);
       alert("Error deleting task");
       setIsDeleteModalOpen(false);
+    } finally {
+      setIsDeletingTask(false);
     }
   };
   const handleSendComment = async () => {
@@ -152,17 +160,18 @@ export const TaskDetailPage = () => {
     };
 
     try {
-      setLoading(true);
+      setIsSendingComment(true);
       const newComment = await createComment(fullData, navigate);
       if (newComment) {
         // @ts-ignore
         setComments((prev) => [...prev, newComment]);
-        setLoading(false);
         setCommentText("");
       }
     } catch (error) {
       console.error("Error creating comment:", error);
       alert("Error creating comment");
+    } finally {
+      setIsSendingComment(false);
     }
   };
   const handleStateChange = async (newState: string) => {
@@ -183,30 +192,32 @@ export const TaskDetailPage = () => {
       return;
     }
     try {
-      setLoading(true);
+      setIsUpdatingState(true);
       const updated = await updateTaskState(
         // @ts-ignore
         { id: task.id, state: newState },
         navigate
       );
       setTask(updated);
-      setLoading(false);
     } catch (error) {
       console.error("Error updating task state", error);
       alert("State transition failed.");
+    } finally {
+      setIsUpdatingState(false);
     }
   };
 
   const reloadAttachments = async () => {
     if (!id) return;
     try {
-      setLoading(true);
+      setIsLoadingAttachments(true);
       const attachments = await fetchAttachments(id, navigate);
       setFiles(attachments);
-      setLoading(false);
     } catch (error) {
       console.error("Error loading attachments:", error);
       alert("Error loading attachments");
+    } finally {
+      setIsLoadingAttachments(false);
     }
   };
 
@@ -214,19 +225,20 @@ export const TaskDetailPage = () => {
     if (!pendingState || !task || !reasonText.trim()) return;
 
     try {
-      setLoading(true);
+      setIsUpdatingState(true);
       const updated = await updateTaskState(
         { id: task.id, state: pendingState, reason: reasonText },
         navigate
       );
       setTask(updated);
-      setLoading(false);
       setIsReasonModalOpen(false);
       setReasonText("");
       setPendingState(null);
     } catch (error) {
       console.error("Error submitting reason", error);
       alert("Failed to update task with reason.");
+    } finally {
+      setIsUpdatingState(false);
     }
   };
 
@@ -350,7 +362,7 @@ export const TaskDetailPage = () => {
                     </div>
                   </TooltipHint>
 
-                  {processedFiles &&
+                  {processedFiles && !isLoadingAttachments ? (
                     processedFiles.map((file: any) => (
                       <li
                         key={file.id}
@@ -375,7 +387,12 @@ export const TaskDetailPage = () => {
                           {file.fileName}
                         </a>
                       </li>
-                    ))}
+                    ))
+                  ) : (
+                    <div className="flex justify-center items-center flex-grow h-[60vh]">
+                      <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
+                    </div>
+                  )}
                 </ul>
               </div>
             }
@@ -474,7 +491,7 @@ export const TaskDetailPage = () => {
           <Form
             fields={modalFields}
             onSubmit={handleUpdateTask}
-            loading={loading}
+            loading={isUpdatingTask}
             initialValues={{
               title: task.title,
               description: task.description,
@@ -505,7 +522,11 @@ export const TaskDetailPage = () => {
             onClick={submitReasonAndUpdateState}
             disabled={!reasonText.trim()}
           >
-            Submit
+            {isUpdatingState ? (
+              <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </Modal>
@@ -528,7 +549,11 @@ export const TaskDetailPage = () => {
             className="mt-4 bg-blue-700 text-white py-2 px-4 rounded"
             onClick={handleDeleteTask}
           >
-            Yes
+            {isDeletingTask ? (
+              <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       </Modal>

@@ -88,22 +88,25 @@ export const LoginPage: React.FC = () => {
               <h2 className="text-2xl font-bold">Login</h2>
               <p className="text-lg italic text-gray-600">MOP up tasks!</p>
             </div>
-            {loading ? (
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
-              </div>
-            ) : (
-              <>
-                <Form fields={loginFields} onSubmit={handleSubmit} />
-                <button
-                  onClick={handleExplore}
-                  className="text-purple-800 hover:text-purple-600 text-sm font-medium mt-4"
-                  disabled={loading}
-                >
-                  I just want to explore the app
-                </button>
-              </>
-            )}
+
+            <>
+              <Form
+                fields={loginFields}
+                onSubmit={handleSubmit}
+                loading={loading}
+              />
+              <button
+                onClick={handleExplore}
+                className="text-purple-800 hover:text-purple-600 text-sm font-medium mt-4"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+                ) : (
+                  "I just want to explore the app"
+                )}
+              </button>
+            </>
           </div>
         </div>
 
