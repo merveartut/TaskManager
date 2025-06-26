@@ -45,6 +45,7 @@ export const ProjectDetailPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchByTitle, setSearchByTitle] = useState("");
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
+  const [loading, setLoading] = useState(false);
   const teamMembers = useSelector(
     (state: RootState) => state.teamMembers.teamMembers
   );
@@ -114,9 +115,11 @@ export const ProjectDetailPage = () => {
     };
 
     try {
+      setLoading(true);
       const newTask = await createTask(fullData, navigate);
       if (newTask) {
         setTasks((prev) => [...prev, newTask]);
+        setLoading(false);
         setIsModalOpen(false);
         toast.success("Task created successfully!");
       }
@@ -131,11 +134,13 @@ export const ProjectDetailPage = () => {
       id: id,
     };
     try {
+      setLoading(true);
       const updatedProject = await updateProject(fullData, navigate);
 
       if (updatedProject) {
-        setIsUpdateModalOpen(false);
         setProject(updatedProject);
+        setLoading(false);
+        setIsUpdateModalOpen(false);
         toast.success("Project updated successfully!");
       }
     } catch (error) {
@@ -145,8 +150,10 @@ export const ProjectDetailPage = () => {
   };
   const handleDeleteProject = async () => {
     try {
+      setLoading(true);
       // @ts-ignore
       await deleteProject(id, navigate);
+      setLoading(false);
       setIsDeleteModalOpen(false);
       toast.success("Project deleted successfully!");
       navigate(-1);
@@ -161,6 +168,7 @@ export const ProjectDetailPage = () => {
     localStorage.setItem("currentProjectId", id);
     const loadData = async () => {
       try {
+        setLoading(true);
         const [tasksData, usersData, projectData] = await Promise.all([
           fetchTasksByProjectId(id, navigate),
           fetchUsers(navigate),
@@ -170,7 +178,7 @@ export const ProjectDetailPage = () => {
         setTasks(tasksData);
         setUsers(usersData);
         setProject(projectData);
-
+        setLoading(false);
         dispatch(fetchTeamMembersThunk(id));
       } catch (error) {
         console.error("Error loading data:", error);
@@ -329,25 +337,33 @@ export const ProjectDetailPage = () => {
               <CirclePlus size={36} />
             </div>
           )}
-        {filteredTasks.map((task: any) => (
-          <div
-            key={task.id}
-            className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/taskDetail/${task.id}`)}
-          >
-            <h2 className="text-xl font-roboto font-semibold">{task.title}</h2>
-            <p className="text-gray-600 font-roboto mt-4">
-              Assignee: {task.assignee.name}
-            </p>
-            <div
-              className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
-                stateColors[task.state] || ""
-              }`}
-            >
-              {task.state}
-            </div>
+        {loading ? (
+          <div className="flex justify-center items-center flex-grow h-[60vh]">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
           </div>
-        ))}
+        ) : (
+          filteredTasks.map((task: any) => (
+            <div
+              key={task.id}
+              className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/taskDetail/${task.id}`)}
+            >
+              <h2 className="text-xl font-roboto font-semibold">
+                {task.title}
+              </h2>
+              <p className="text-gray-600 font-roboto mt-4">
+                Assignee: {task.assignee.name}
+              </p>
+              <div
+                className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
+                  stateColors[task.state] || ""
+                }`}
+              >
+                {task.state}
+              </div>
+            </div>
+          ))
+        )}
       </div>
       {/* Modal for Creating Task */}
       <Modal
@@ -355,7 +371,11 @@ export const ProjectDetailPage = () => {
         onClose={() => setIsModalOpen(false)}
         title="CREATE NEW TASK"
       >
-        <Form fields={modalFields} onSubmit={handleCreateTask} />
+        <Form
+          fields={modalFields}
+          onSubmit={handleCreateTask}
+          loading={loading}
+        />
       </Modal>
 
       {/* Modal for Updating Project */}
@@ -367,6 +387,7 @@ export const ProjectDetailPage = () => {
         <Form
           fields={updateModalFields}
           onSubmit={handleUpdateProject}
+          loading={loading}
           initialValues={{
             title: project?.title,
             description: project?.description,

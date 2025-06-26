@@ -49,6 +49,7 @@ export const TaskDetailPage = () => {
   const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
   const [reasonText, setReasonText] = useState("");
   const [pendingState, setPendingState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const currentUser = localStorage.getItem("userId");
   const teamMembers = useSelector(
     (state: RootState) => state.teamMembers.teamMembers
@@ -85,6 +86,7 @@ export const TaskDetailPage = () => {
 
     const loadData = async () => {
       try {
+        setLoading(true);
         const [taskData, attachments, commentsData] = await Promise.all([
           getTaskById(id, navigate),
           fetchAttachments(id, navigate),
@@ -94,6 +96,7 @@ export const TaskDetailPage = () => {
         setTask(taskData);
         setFiles(attachments);
         setComments(commentsData);
+        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
@@ -112,9 +115,11 @@ export const TaskDetailPage = () => {
     };
 
     try {
+      setLoading(true);
       const updatedTask = await updateTask(fullData, navigate);
       if (updatedTask) {
         setTask(updatedTask);
+        setLoading(false);
         setIsModalOpen(false);
         toast.success("Task updated successfully!");
       }
@@ -126,8 +131,10 @@ export const TaskDetailPage = () => {
 
   const handleDeleteTask = async () => {
     try {
+      setLoading(true);
       // @ts-ignore
       await deleteTask(id, navigate);
+      setLoading(false);
       setIsDeleteModalOpen(false);
       toast.success("Task deleted successfully!");
       navigate(-1);
@@ -145,10 +152,12 @@ export const TaskDetailPage = () => {
     };
 
     try {
+      setLoading(true);
       const newComment = await createComment(fullData, navigate);
       if (newComment) {
         // @ts-ignore
         setComments((prev) => [...prev, newComment]);
+        setLoading(false);
         setCommentText("");
       }
     } catch (error) {
@@ -174,12 +183,14 @@ export const TaskDetailPage = () => {
       return;
     }
     try {
+      setLoading(true);
       const updated = await updateTaskState(
         // @ts-ignore
         { id: task.id, state: newState },
         navigate
       );
       setTask(updated);
+      setLoading(false);
     } catch (error) {
       console.error("Error updating task state", error);
       alert("State transition failed.");
@@ -189,8 +200,10 @@ export const TaskDetailPage = () => {
   const reloadAttachments = async () => {
     if (!id) return;
     try {
+      setLoading(true);
       const attachments = await fetchAttachments(id, navigate);
       setFiles(attachments);
+      setLoading(false);
     } catch (error) {
       console.error("Error loading attachments:", error);
       alert("Error loading attachments");
@@ -201,11 +214,13 @@ export const TaskDetailPage = () => {
     if (!pendingState || !task || !reasonText.trim()) return;
 
     try {
+      setLoading(true);
       const updated = await updateTaskState(
         { id: task.id, state: pendingState, reason: reasonText },
         navigate
       );
       setTask(updated);
+      setLoading(false);
       setIsReasonModalOpen(false);
       setReasonText("");
       setPendingState(null);
@@ -459,6 +474,7 @@ export const TaskDetailPage = () => {
           <Form
             fields={modalFields}
             onSubmit={handleUpdateTask}
+            loading={loading}
             initialValues={{
               title: task.title,
               description: task.description,

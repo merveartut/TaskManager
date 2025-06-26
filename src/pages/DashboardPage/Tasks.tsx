@@ -23,6 +23,7 @@ export const Tasks = () => {
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<string | any>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
 
@@ -67,6 +68,7 @@ export const Tasks = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const [projectsData, tasksData, usersData] = await Promise.all([
           fetchProjects(navigate),
           fetchTasks(navigate),
@@ -76,6 +78,7 @@ export const Tasks = () => {
         setProjects(projectsData);
         setTasks(tasksData);
         setUsers(usersData);
+        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
@@ -87,12 +90,14 @@ export const Tasks = () => {
 
   const handleCreateTask = async (formData: any) => {
     try {
+      setLoading(true);
       const newTask = await createTask(formData, navigate);
       if (newTask) {
         // @ts-ignore
         setTasks((prev) => [...prev, newTask]);
         setIsModalOpen(false);
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error creating task:", error);
       alert("Error creating task");
@@ -161,43 +166,52 @@ export const Tasks = () => {
 
       <Divider />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-        {(userRole === "ADMIN" ||
-          userRole === "PROJECT_MANAGER" ||
-          userRole === "GUEST") && (
-          <div
-            onClick={() => setIsModalOpen(true)}
-            className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-          >
-            <h2 className="text-xl font-roboto font-semibold mb-6">
-              Create new Task
-            </h2>
-            <CirclePlus size={36} />
-          </div>
-        )}
-        {filteredTasks.map((task: any) => (
-          <div
-            key={task.id}
-            className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/taskDetail/${task.id}`)}
-          >
-            <h2 className="text-xl font-roboto font-semibold">{task.title}</h2>
-            <p className="text-gray-600 font-roboto mt-4">
-              Project: {task.project.title}
-            </p>
-            <p className="text-gray-600 font-roboto mt-4">
-              Assignee: {task.assignee.name}
-            </p>
+      {loading ? (
+        <div className="flex justify-center items-center flex-grow h-[60vh]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
+          {(userRole === "ADMIN" ||
+            userRole === "PROJECT_MANAGER" ||
+            userRole === "GUEST") && (
             <div
-              className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
-                stateColors[task.state] || ""
-              }`}
+              onClick={() => setIsModalOpen(true)}
+              className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             >
-              {task.state}
+              <h2 className="text-xl font-roboto font-semibold mb-6">
+                Create new Task
+              </h2>
+              <CirclePlus size={36} />
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+          {filteredTasks.map((task: any) => (
+            <div
+              key={task.id}
+              className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/taskDetail/${task.id}`)}
+            >
+              <h2 className="text-xl font-roboto font-semibold">
+                {task.title}
+              </h2>
+              <p className="text-gray-600 font-roboto mt-4">
+                Project: {task.project.title}
+              </p>
+              <p className="text-gray-600 font-roboto mt-4">
+                Assignee: {task.assignee.name}
+              </p>
+              <div
+                className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
+                  stateColors[task.state] || ""
+                }`}
+              >
+                {task.state}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Modal for Creating Task */}
       <Modal
         isOpen={isModalOpen}

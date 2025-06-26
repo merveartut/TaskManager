@@ -89,6 +89,7 @@ export const Form: React.FC<FormProps> = ({
       ) : (
         <button
           type="submit"
+          disabled={loading}
           className="mt-4 bg-indigo-700 hover:bg-indigo-500 text-white py-2 px-4 rounded"
         >
           Submit

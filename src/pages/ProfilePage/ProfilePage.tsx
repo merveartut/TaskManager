@@ -34,6 +34,7 @@ export const ProfilePage = () => {
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
   const [selectedTaskState, setSelectedTaskState] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   const modalFields = [
     {
@@ -55,6 +56,7 @@ export const ProfilePage = () => {
 
     const loadData = async () => {
       try {
+        setLoading(true);
         const [userData, tasksData, projectsData] = await Promise.all([
           getUserById(id, navigate),
           fetchTasksByUserId(id, navigate),
@@ -66,6 +68,7 @@ export const ProfilePage = () => {
         setProjects(projectsData);
         setEmailInput(userData.email);
         setNameInput(userData.name);
+        setLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
@@ -97,7 +100,9 @@ export const ProfilePage = () => {
 
   const handleChangePassword = async (formData: any) => {
     try {
+      setLoading(true);
       await changePassword(formData);
+      setLoading(false);
       toast.success("Password updated successfully!");
       setIsPasswordModalOpen(false);
     } catch (error: any) {
@@ -108,7 +113,9 @@ export const ProfilePage = () => {
   const handleChangeEmail = async () => {
     if (id) {
       try {
+        setLoading(true);
         await updateUserEmail(id, emailInput, navigate);
+        setLoading(false);
         toast.success("Email updated successfully!");
         setIsEmailModalOpen(false);
       } catch (error: any) {
@@ -121,6 +128,7 @@ export const ProfilePage = () => {
     if (id) {
       try {
         await updateUserName(id, nameInput, navigate);
+        setLoading(false);
         toast.success("Name updated successfully!");
         setIsNameModalOpen(false);
       } catch (error: any) {
@@ -202,28 +210,35 @@ export const ProfilePage = () => {
           </div>
         </>
       )}
-      {projects.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-          {filteredProjects.map((project: any) => (
-            <div
-              key={project.id}
-              className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate(`/projectDetail/${project.id}`)}
-            >
-              <h2 className="text-xl font-roboto font-semibold">
-                {project.title}
-              </h2>
-              <div
-                className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
-                  stateColors[project.status] || ""
-                }`}
-              >
-                {project.status}
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="flex justify-center items-center flex-grow h-[60vh]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
+      ) : (
+        projects.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
+            {filteredProjects.map((project: any) => (
+              <div
+                key={project.id}
+                className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/projectDetail/${project.id}`)}
+              >
+                <h2 className="text-xl font-roboto font-semibold">
+                  {project.title}
+                </h2>
+                <div
+                  className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
+                    stateColors[project.status] || ""
+                  }`}
+                >
+                  {project.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       )}
+
       {<Divider />}
 
       <div className="flex flex-row justify-between items-center p-8 flex-wrap">
@@ -264,38 +279,48 @@ export const ProfilePage = () => {
           </div>
         )}
       </div>
-
-      {filteredTasks.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
-          {filteredTasks.map((task: any) => (
-            <div
-              key={task.id}
-              className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate(`/taskDetail/${task.id}`)}
-            >
-              <h2 className="text-xl font-roboto font-semibold">
-                {task.title}
-              </h2>
-              <p className="text-gray-600 font-roboto mt-4">
-                Project: {task.project.title}
-              </p>
-              <div
-                className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
-                  stateColors[task.state] || ""
-                }`}
-              >
-                {task.state}
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="flex justify-center items-center flex-grow h-[60vh]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-purple-600"></div>
         </div>
+      ) : (
+        filteredTasks.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-8">
+            {filteredTasks.map((task: any) => (
+              <div
+                key={task.id}
+                className="bg-white flex flex-col p-4 items-center rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/taskDetail/${task.id}`)}
+              >
+                <h2 className="text-xl font-roboto font-semibold">
+                  {task.title}
+                </h2>
+                <p className="text-gray-600 font-roboto mt-4">
+                  Project: {task.project.title}
+                </p>
+                <div
+                  className={`text-gray-600 mt-4 font-roboto font-bold w-fit p-2 rounded-md ${
+                    stateColors[task.state] || ""
+                  }`}
+                >
+                  {task.state}
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       )}
+
       <Modal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
         title="CHANGE PASSWORD"
       >
-        <Form fields={modalFields} onSubmit={handleChangePassword} />
+        <Form
+          fields={modalFields}
+          onSubmit={handleChangePassword}
+          loading={loading}
+        />
       </Modal>
       <Modal
         isOpen={isEmailModalOpen}
@@ -314,6 +339,7 @@ export const ProfilePage = () => {
         <div className="flex flex-row justify-center gap-6">
           <button
             className="bg-blue-600 text-white rounded px-4 py-2 mt-4 self-end"
+            disabled={loading}
             onClick={handleChangeEmail}
           >
             Submit
@@ -337,6 +363,7 @@ export const ProfilePage = () => {
         <div className="flex flex-row justify-center gap-6">
           <button
             className="bg-blue-600 text-white rounded px-4 py-2 mt-4"
+            disabled={loading}
             onClick={handleChangeName}
           >
             Submit
