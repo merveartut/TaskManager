@@ -25,7 +25,6 @@ export const Projects: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchByTitle, setSearchByTitle] = useState("");
   const [isFetchingProjects, setIsFetchingProjects] = useState(false);
-  const [isFetchingUsers, setIsFetchingUsers] = useState(false);
   const [isCreatingProjects, setIsCreatingProject] = useState(false);
   const [selectedProjectStatus, setSelectedProjectStatus] =
     useState<string>("");
@@ -107,7 +106,6 @@ export const Projects: React.FC = () => {
 
     const fetchUsers = async () => {
       try {
-        setIsFetchingUsers(true);
         const response = await fetch(`${API_BASE}/api/users/v1`, {
           method: "GET",
           headers: {
@@ -125,8 +123,6 @@ export const Projects: React.FC = () => {
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
-      } finally {
-        setIsFetchingUsers(false);
       }
     };
 

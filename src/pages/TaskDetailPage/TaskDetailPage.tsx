@@ -49,7 +49,6 @@ export const TaskDetailPage = () => {
   const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
   const [reasonText, setReasonText] = useState("");
   const [pendingState, setPendingState] = useState<string | null>(null);
-  const [isFetchingData, setIsFetchingData] = useState(false);
   const [isUpdatingTask, setIsUpdatingTask] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [isSendingComment, setIsSendingComment] = useState(false);
@@ -91,7 +90,6 @@ export const TaskDetailPage = () => {
 
     const loadData = async () => {
       try {
-        setIsFetchingData(true);
         const [taskData, attachments, commentsData] = await Promise.all([
           getTaskById(id, navigate),
           fetchAttachments(id, navigate),
@@ -104,8 +102,6 @@ export const TaskDetailPage = () => {
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Error loading data");
-      } finally {
-        setIsFetchingData(false);
       }
     };
 
@@ -469,7 +465,11 @@ export const TaskDetailPage = () => {
                         }
                         onClick={handleSendComment}
                       >
-                        Send
+                        {isSendingComment ? (
+                          <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white border-solid"></span>
+                        ) : (
+                          "Send"
+                        )}
                       </button>
                     </TooltipHint>
                   </div>
